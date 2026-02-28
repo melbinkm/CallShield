@@ -5,7 +5,10 @@ from mistralai import Mistral
 load_dotenv()
 
 # Read Mistral API key from .secrets/mistral_api_key
-with open("/mnt/d/mistral-hackathon/.secrets/mistral_api_key", "r") as f:
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+secrets_path = os.path.join(project_root, ".secrets", "mistral_api_key")
+with open(secrets_path, "r") as f:
     MISTRAL_API_KEY = f.read().strip()
 AUDIO_MODEL = "voxtral-mini-latest"
 TEXT_MODEL = "mistral-large-latest"
