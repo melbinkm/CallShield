@@ -102,6 +102,8 @@ class StreamProcessor:
             "cumulative_score": round(self.cumulative_score, 4),
             "verdict": data.get("verdict", "SAFE"),
             "signals": signals,
+            "recommendation": data.get("recommendation", ""),
+            "transcript_summary": data.get("transcript_summary", ""),
         }
 
     def get_final_result(self) -> dict:

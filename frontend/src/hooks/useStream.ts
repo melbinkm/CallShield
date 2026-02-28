@@ -9,6 +9,8 @@ interface PartialResult {
   cumulative_score?: number;
   verdict?: string;
   signals?: Signal[];
+  recommendation?: string;
+  transcript_summary?: string;
 }
 
 // WAV encoder helpers

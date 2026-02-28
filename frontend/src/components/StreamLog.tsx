@@ -68,6 +68,11 @@ seconds)...</p>
                   ))}
                 </ul>
               )}
+              {r.recommendation && (
+                <p className="text-xs text-blue-400 mt-2 italic">
+                  {r.recommendation}
+                </p>
+              )}
             </div>
           ))}
         </div>
