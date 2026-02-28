@@ -12,7 +12,7 @@ type Tab = "upload" | "record" | "paste";
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("upload");
   const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
-  const { isRecording, partialResults, finalResult, error: streamError, startRecording, stopRecording } = useStream();
+  const { isRecording, partialResults, error: streamError, startRecording, stopRecording } = useStream();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white">
