@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import InputPanel from "./components/InputPanel/InputPanel";
 import type { ScamReport } from "./types/scamReport";
 
 type Tab = "upload" | "record" | "paste";
@@ -15,10 +16,19 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-gray-950 text-white">
       <Header />
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-8">
-        {/* InputPanel will go here */}
-        <div className="bg-gray-800 rounded-lg p-6 text-center text-gray-400">
-          Input Panel placeholder (Phase 7)
-        </div>
+        <InputPanel
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onFileSelect={(file) => {
+            console.log("File selected:", file.name);
+            // Phase 9 will connect this to the API
+          }}
+          onTranscriptSubmit={(text) => {
+            console.log("Transcript submitted:", text.substring(0, 50));
+            // Phase 9 will connect this to the API
+          }}
+          disabled={isAnalyzing}
+        />
 
         {/* AnalysisPanel will go here */}
         <div className="bg-gray-800 rounded-lg p-6 text-center text-gray-400">
