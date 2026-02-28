@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
+const API_URL = import.meta.env.VITE_API_URL ||
+  `${window.location.protocol}//${window.location.hostname}:8001`;
 import type { ScamReport } from "../types/scamReport";
 
 export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<ScamReport> {
