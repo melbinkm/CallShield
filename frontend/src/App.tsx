@@ -20,15 +20,25 @@ export default function App() {
   const lastResult = partialResults[partialResults.length - 1];
   const cumulativeScore = lastResult?.cumulative_score;
 
-  // Deterministic verdict from cumulative score (matching backend thresholds)
-  const cumulativeVerdict = cumulativeScore !== undefined
-    ? cumulativeScore < 0.3 ? "SAFE"
-      : cumulativeScore < 0.6 ? "SUSPICIOUS"
-      : cumulativeScore < 0.85 ? "LIKELY_SCAM"
+  // Peak score across all chunks
+  const peakScore = partialResults.length > 0
+    ? Math.max(...partialResults.map(r => r.scam_score ?? 0))
+    : 0;
+
+  // Effective score: 60% peak + 40% cumulative average (peak-weighted)
+  const effectiveScore = cumulativeScore !== undefined
+    ? peakScore * 0.6 + cumulativeScore * 0.4
+    : undefined;
+
+  // Deterministic verdict from effective score
+  const cumulativeVerdict = effectiveScore !== undefined
+    ? effectiveScore < 0.3 ? "SAFE"
+      : effectiveScore < 0.6 ? "SUSPICIOUS"
+      : effectiveScore < 0.85 ? "LIKELY_SCAM"
       : "SCAM"
     : undefined;
 
-  // Recommendation from the highest-scoring chunk (most severe)
+  // Recommendation from the highest-scoring chunk
   const highestChunk = partialResults.length > 0
     ? partialResults.reduce((max, r) => (r.scam_score ?? 0) > (max.scam_score ?? 0) ? r : max, partialResults[0])
     : undefined;
@@ -47,7 +57,7 @@ export default function App() {
           isRecording={isRecording}
           onStartRecording={startRecording}
           onStopRecording={stopRecording}
-          cumulativeScore={cumulativeScore}
+          cumulativeScore={effectiveScore}
           verdict={cumulativeVerdict}
           recommendation={bestRecommendation}
         />
