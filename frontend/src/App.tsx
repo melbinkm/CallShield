@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import InputPanel from "./components/InputPanel/InputPanel";
+import AnalysisPanel from "./components/AnalysisPanel/AnalysisPanel";
 import type { ScamReport } from "./types/scamReport";
 
 type Tab = "upload" | "record" | "paste";
@@ -30,10 +31,7 @@ export default function App() {
           disabled={isAnalyzing}
         />
 
-        {/* AnalysisPanel will go here */}
-        <div className="bg-gray-800 rounded-lg p-6 text-center text-gray-400">
-          Analysis Panel placeholder (Phase 8)
-        </div>
+        <AnalysisPanel report={currentReport} isLoading={isAnalyzing} />
       </main>
       <Footer />
     </div>
