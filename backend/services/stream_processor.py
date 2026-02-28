@@ -17,6 +17,8 @@ def is_silent(audio_bytes: bytes, threshold=500) -> bool:
         return True
     try:
         num_samples = len(pcm_data) // 2
+        if num_samples == 0:
+            return True
         samples = struct.unpack(f"<{num_samples}h", pcm_data[:num_samples * 2])
         rms = (sum(s * s for s in samples) / num_samples) ** 0.5
         return rms < threshold
