@@ -80,19 +80,21 @@ async def analyze_transcript_endpoint(request: TranscriptRequest):
     # Call Mistral text analysis
     try:
         raw_response = await analyze_text(transcript)
-    except Exception:
+    except Exception as e:
+        logger.exception("Text analysis failed: %s", e)
         raise HTTPException(
             status_code=502,
-            detail={"error": "model_error", "detail": "Text analysis service temporarily unavailable"},
+            detail={"error": "model_error", "detail": f"Text analysis service temporarily unavailable: {e}"},
         )
 
     # Parse response
     try:
         text_result = parse_analysis_result(raw_response)
-    except Exception:
+    except Exception as e:
+        logger.exception("Text result parsing failed: %s", e)
         raise HTTPException(
             status_code=502,
-            detail={"error": "parse_error", "detail": "Failed to process analysis results"},
+            detail={"error": "parse_error", "detail": f"Failed to process analysis results: {e}"},
         )
 
     # Build and return report
