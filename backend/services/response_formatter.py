@@ -53,18 +53,30 @@ def parse_analysis_result(raw: str) -> AnalysisResult:
     """Parse raw model output into a validated AnalysisResult."""
     data = extract_json(raw)
 
+    # Validate verdict against enum values
+    valid_verdicts = {v.value for v in Verdict}
+    raw_verdict = data.get("verdict", "SAFE")
+    if raw_verdict not in valid_verdicts:
+        raw_verdict = "SAFE"  # Fallback to safe default
+
     signals = []
     for s in data.get("signals", []):
+        # Validate severity against enum values
+        valid_severities = {sev.value for sev in Severity}
+        raw_severity = s.get("severity", "medium")
+        if raw_severity not in valid_severities:
+            raw_severity = "medium"  # Fallback to medium default
+        
         signals.append(Signal(
             category=s.get("category", "UNKNOWN"),
             detail=s.get("detail", ""),
-            severity=s.get("severity", "medium"),
+            severity=raw_severity,
         ))
 
     return AnalysisResult(
         scam_score=float(data.get("scam_score", 0.0)),
         confidence=float(data.get("confidence", 0.5)),
-        verdict=data.get("verdict", "SAFE"),
+        verdict=raw_verdict,
         signals=signals,
         transcript_summary=data.get("transcript_summary"),
         recommendation=data.get("recommendation", "No specific recommendation."),
