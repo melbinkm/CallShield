@@ -7,6 +7,7 @@ interface PartialResult {
   cumulative_score?: number;
   verdict?: string;
   signals?: Signal[];
+  recommendation?: string;
 }
 
 interface Props {
