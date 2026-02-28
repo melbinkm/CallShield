@@ -99,8 +99,7 @@ class StreamProcessor:
         self.last_recommendation = data.get("recommendation", "")
         self.last_transcript_summary = data.get("transcript_summary", "")
 
-        # Update cumulative score with running average
-        self.chunk_index += 1
+        # Update cumulative score with running average (chunk_index already incremented above)
         self.cumulative_score = (
             (self.cumulative_score * (self.chunk_index - 1) + chunk_score)
             / self.chunk_index
