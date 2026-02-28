@@ -45,6 +45,7 @@ seconds)...</p>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                   r.verdict === "SAFE" ? "bg-green-900 text-green-300" :
                   r.verdict === "SUSPICIOUS" ? "bg-yellow-900 text-yellow-300" :
+                  r.verdict === "LIKELY_SCAM" ? "bg-orange-900 text-orange-300" :
                   "bg-red-900 text-red-300"
                 }`}>
                   {r.verdict}

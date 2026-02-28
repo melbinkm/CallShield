@@ -6,9 +6,9 @@ interface Props {
 }
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: "record", label: "Record" },
-  { id: "upload", label: "Upload Audio" },
-  { id: "paste", label: "Paste Transcript" },
+  { id: "record", label: "\uD83C\uDFA4 Record" },
+  { id: "upload", label: "\uD83D\uDCC1 Upload Audio" },
+  { id: "paste", label: "\uD83D\uDCCB Paste Transcript" },
 ];
 
 export default function TabSelector({ activeTab, onTabChange }: Props) {

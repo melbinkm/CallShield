@@ -200,10 +200,11 @@ export function useStream() {
       audioCtxRef.current.close();
       audioCtxRef.current = null;
     }
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "end_stream" }));
-      wsRef.current.close();
-      wsRef.current = null;
+    const ws = wsRef.current;
+    wsRef.current = null;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "end_stream" }));
+      setTimeout(() => ws.close(), 500);
     }
   }, []);
 

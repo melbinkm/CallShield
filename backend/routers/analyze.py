@@ -7,7 +7,7 @@ from services.audio_analyzer import analyze_audio
 from services.text_analyzer import analyze_transcript as analyze_text
 from services.response_formatter import parse_analysis_result, build_scam_report
 from models.schemas import ScamReport, ErrorResponse, TranscriptRequest
-from config import MAX_AUDIO_SIZE_MB
+from config import MAX_AUDIO_SIZE_MB, MAX_TRANSCRIPT_LENGTH
 
 router = APIRouter()
 

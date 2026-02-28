@@ -17,7 +17,7 @@ export default function ScamGauge({ score }: Props) {
   const percentage = Math.round(score * 100);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="relative flex flex-col items-center">
       <svg width="180" height="180" className="-rotate-90">
         {/* Background circle */}
         <circle

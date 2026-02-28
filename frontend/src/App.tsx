@@ -47,6 +47,28 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white">
       <Header />
+
+      {/* How It Works */}
+      <section className="max-w-4xl mx-auto w-full px-4 pt-8 pb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <div className="text-3xl mb-2">{"\uD83C\uDFA4"}</div>
+            <h3 className="text-white font-semibold text-sm">Record or Upload</h3>
+            <p className="text-gray-400 text-xs mt-1">Speak live, upload a WAV, or paste a transcript</p>
+          </div>
+          <div className="bg-gray-900 border border-blue-500/30 rounded-lg p-4">
+            <div className="text-3xl mb-2">{"\uD83E\uDDE0"}</div>
+            <h3 className="text-white font-semibold text-sm">Voxtral Analyzes Audio Directly</h3>
+            <p className="text-gray-400 text-xs mt-1">No transcription step — Voxtral reasons about audio natively</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <div className="text-3xl mb-2">{"\uD83D\uDEE1\uFE0F"}</div>
+            <h3 className="text-white font-semibold text-sm">Real-time Verdict</h3>
+            <p className="text-gray-400 text-xs mt-1">Get a scam score, signals, and recommendation instantly</p>
+          </div>
+        </div>
+      </section>
+
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-8">
         <InputPanel
           activeTab={activeTab}
@@ -65,13 +87,13 @@ export default function App() {
         />
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
+          <div role="alert" className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
             {error}
           </div>
         )}
 
         {streamError && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
+          <div role="alert" className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
             {streamError}
           </div>
         )}
