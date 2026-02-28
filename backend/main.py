@@ -7,8 +7,6 @@ app = FastAPI(title="Scam Detector API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5177",
-        "https://localhost:5177",
         "https://callshield-ui.onrender.com",
     ],
     allow_credentials=True,
