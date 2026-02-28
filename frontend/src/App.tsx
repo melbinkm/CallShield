@@ -31,7 +31,7 @@ export default function App() {
           onStopRecording={stopRecording}
           cumulativeScore={partialResults[partialResults.length - 1]?.cumulative_score}
           verdict={partialResults[partialResults.length - 1]?.verdict}
-          recommendation={partialResults[partialResults.length - 1]?.recommendation}
+          recommendation={[...partialResults].reverse().find(r => r.recommendation && r.scam_score !== 0)?.recommendation || partialResults[partialResults.length - 1]?.recommendation}
         />
 
         {error && (
