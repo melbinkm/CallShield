@@ -1,5 +1,8 @@
 import time
+import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException
+
+logger = logging.getLogger(__name__)
 from services.audio_analyzer import analyze_audio
 from services.text_analyzer import analyze_transcript as analyze_text
 from services.response_formatter import parse_analysis_result, build_scam_report
@@ -38,19 +41,21 @@ async def analyze_audio_endpoint(file: UploadFile = File(...)):
     # Call Voxtral audio analysis
     try:
         raw_response = await analyze_audio(audio_bytes)
-    except Exception:
+    except Exception as e:
+        logger.exception("Audio analysis failed: %s", e)
         raise HTTPException(
             status_code=502,
-            detail={"error": "model_error", "detail": "Audio analysis service temporarily unavailable"},
+            detail={"error": "model_error", "detail": f"Audio analysis failed: {e}"},
         )
 
     # Parse response
     try:
         audio_result = parse_analysis_result(raw_response)
-    except Exception:
+    except Exception as e:
+        logger.exception("Parse failed: %s", e)
         raise HTTPException(
             status_code=502,
-            detail={"error": "parse_error", "detail": "Failed to process analysis results"},
+            detail={"error": "parse_error", "detail": f"Failed to parse results: {e}"},
         )
 
     # Build and return report
