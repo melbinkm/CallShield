@@ -6,8 +6,8 @@ interface Props {
 }
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: "upload", label: "Upload Audio" },
   { id: "record", label: "Record" },
+  { id: "upload", label: "Upload Audio" },
   { id: "paste", label: "Paste Transcript" },
 ];
 

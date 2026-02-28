@@ -11,7 +11,7 @@ import { useStream } from "./hooks/useStream";
 type Tab = "upload" | "record" | "paste";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>("upload");
+  const [activeTab, setActiveTab] = useState<Tab>("record");
   const [showLog, setShowLog] = useState(false);
   const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
   const { isRecording, partialResults, error: streamError, startRecording, stopRecording } = useStream();
