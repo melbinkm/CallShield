@@ -25,6 +25,8 @@ class StreamProcessor:
         self.chunk_index = 0
         self.cumulative_score = 0.0
         self.all_signals = []
+        self.last_recommendation = ""
+        self.last_transcript_summary = ""
 
     async def process_chunk(self, audio_chunk: bytes) -> dict:
         """Process a single audio chunk and return partial result."""
@@ -82,6 +84,8 @@ class StreamProcessor:
 
         chunk_score = float(data.get("scam_score", 0.0))
         signals = data.get("signals", [])
+        self.last_recommendation = data.get("recommendation", "")
+        self.last_transcript_summary = data.get("transcript_summary", "")
 
         # Update cumulative score with running average
         self.chunk_index += 1
@@ -111,4 +115,6 @@ class StreamProcessor:
             "combined_score": round(self.cumulative_score, 4),
             "verdict": verdict,
             "signals": self.all_signals,
+            "recommendation": self.last_recommendation,
+            "transcript_summary": self.last_transcript_summary,
         }
