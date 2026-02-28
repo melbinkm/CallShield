@@ -1,7 +1,9 @@
 import base64
 import json
 import asyncio
-from config import client, AUDIO_MODEL
+import functools
+import urllib.request
+from config import MISTRAL_API_KEY, AUDIO_MODEL
 from prompts.templates import SCAM_AUDIO_PROMPT
 from services.response_formatter import extract_json
 
@@ -15,27 +17,43 @@ class StreamProcessor:
         """Process a single audio chunk and return partial result."""
         audio_b64 = base64.b64encode(audio_chunk).decode("utf-8")
 
-        response = await asyncio.to_thread(
-            client.chat.complete,
-            model=AUDIO_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "audio_url",
-                            "audio_url": f"data:audio/wav;base64,{audio_b64}",
+        payload = json.dumps({
+            "model": AUDIO_MODEL,
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_audio",
+                        "input_audio": {
+                            "data": audio_b64,
+                            "format": "wav",
                         },
-                        {
-                            "type": "text",
-                            "text": SCAM_AUDIO_PROMPT,
-                        },
-                    ],
-                }
-            ],
+                    },
+                    {
+                        "type": "text",
+                        "text": SCAM_AUDIO_PROMPT,
+                    },
+                ],
+            }],
+        }).encode()
+
+        req = urllib.request.Request(
+            "https://api.mistral.ai/v1/chat/completions",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {MISTRAL_API_KEY}",
+                "Content-Type": "application/json",
+            },
         )
 
-        raw = response.choices[0].message.content
+        loop = asyncio.get_event_loop()
+        resp = await loop.run_in_executor(
+            None,
+            functools.partial(urllib.request.urlopen, req, timeout=120),
+        )
+
+        body = json.loads(resp.read().decode())
+        raw = body["choices"][0]["message"]["content"]
         data = extract_json(raw)
 
         chunk_score = float(data.get("scam_score", 0.0))
