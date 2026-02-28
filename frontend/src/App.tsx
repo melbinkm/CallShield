@@ -3,15 +3,13 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import InputPanel from "./components/InputPanel/InputPanel";
 import AnalysisPanel from "./components/AnalysisPanel/AnalysisPanel";
-import type { ScamReport } from "./types/scamReport";
+import { useAnalyze } from "./hooks/useAnalyze";
 
 type Tab = "upload" | "record" | "paste";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("upload");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [currentReport, setCurrentReport] = useState<ScamReport | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white">
@@ -20,18 +18,18 @@ export default function App() {
         <InputPanel
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          onFileSelect={(file) => {
-            console.log("File selected:", file.name);
-            // Phase 9 will connect this to the API
-          }}
-          onTranscriptSubmit={(text) => {
-            console.log("Transcript submitted:", text.substring(0, 50));
-            // Phase 9 will connect this to the API
-          }}
+          onFileSelect={submitAudio}
+          onTranscriptSubmit={submitTranscript}
           disabled={isAnalyzing}
         />
 
-        <AnalysisPanel report={currentReport} isLoading={isAnalyzing} />
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <AnalysisPanel report={report} isLoading={isAnalyzing} />
       </main>
       <Footer />
     </div>
