@@ -23,6 +23,10 @@ export default function InputPanel({
   onFileSelect,
   onTranscriptSubmit,
   disabled,
+  isRecording,
+  onStartRecording,
+  onStopRecording,
+  cumulativeScore,
 }: Props) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
