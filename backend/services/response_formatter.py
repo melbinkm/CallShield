@@ -73,8 +73,12 @@ def parse_analysis_result(raw: str) -> AnalysisResult:
             severity=raw_severity,
         ))
 
+    # Clamp scam_score to valid range [0.0, 1.0]
+    raw_score = float(data.get("scam_score", 0.0))
+    clamped_score = max(0.0, min(1.0, raw_score))
+    
     return AnalysisResult(
-        scam_score=float(data.get("scam_score", 0.0)),
+        scam_score=clamped_score,
         confidence=float(data.get("confidence", 0.5)),
         verdict=raw_verdict,
         signals=signals,
