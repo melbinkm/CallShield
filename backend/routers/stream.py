@@ -64,11 +64,13 @@ async def stream_audio(ws: WebSocket):
                     except Exception:
                         pass
                     chunk_count += 1
-                except Exception:
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).exception("Chunk processing failed: %s", e)
                     try:
                         await ws.send_json({
                             "type": "error",
-                            "detail": "Failed to process audio chunk",
+                            "detail": f"Failed to process audio chunk: {e}",
                         })
                     except Exception:
                         pass
