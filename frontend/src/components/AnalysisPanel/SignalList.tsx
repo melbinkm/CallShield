@@ -23,7 +23,7 @@ export default function SignalList({ signals }: Props) {
       {signals.map((signal, i) => (
         <div
           key={i}
-          className={`border-l-4 pl-4 py-2 ${severityColor[signal.severity]}`}
+          className={`border-l-4 pl-4 py-2 ${severityColor[signal.severity] || severityColor.medium}`}
         >
           <p className="font-medium text-sm">{signal.category}</p>
           <p className="text-gray-400 text-sm mt-1">{signal.detail}</p>

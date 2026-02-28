@@ -20,8 +20,8 @@ export function useAnalyze() {
     try {
       const result = await analyzeAudio(file, controller.signal);
       setReport(result);
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
         setError(err.message || "Audio analysis failed");
       }
     } finally {
@@ -41,8 +41,8 @@ export function useAnalyze() {
     try {
       const result = await analyzeTranscript(text, controller.signal);
       setReport(result);
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
         setError(err.message || "Transcript analysis failed");
       }
     } finally {
