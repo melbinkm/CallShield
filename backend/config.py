@@ -4,7 +4,9 @@ from mistralai import Mistral
 
 load_dotenv()
 
-MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
+# Read Mistral API key from .secrets/mistral_api_key
+with open("/mnt/d/mistral-hackathon/.secrets/mistral_api_key", "r") as f:
+    MISTRAL_API_KEY = f.read().strip()
 AUDIO_MODEL = "voxtral-mini-latest"
 TEXT_MODEL = "mistral-large-latest"
 MAX_AUDIO_SIZE_MB = 25
