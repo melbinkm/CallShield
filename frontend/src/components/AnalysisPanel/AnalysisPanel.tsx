@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ScamReport } from "../../types/scamReport";
 import ScamGauge from "./ScamGauge";
 import VerdictBadge from "./VerdictBadge";
@@ -7,6 +8,35 @@ import RecommendationBox from "./RecommendationBox";
 interface Props {
   report: ScamReport | null;
   isLoading?: boolean;
+}
+
+function formatReportForClipboard(report: ScamReport): string {
+  const analysis = report.audio_analysis || report.text_analysis;
+  if (!analysis) return "";
+
+  const lines: string[] = [
+    `CallShield Analysis Results`,
+    `===========================`,
+    `Score: ${Math.round(report.combined_score * 100)}%`,
+    `Verdict: ${analysis.verdict}`,
+    `Confidence: ${Math.round(analysis.confidence * 100)}%`,
+    ``,
+  ];
+
+  if (analysis.transcript_summary) {
+    lines.push(`Summary: ${analysis.transcript_summary}`, ``);
+  }
+
+  if (analysis.signals.length > 0) {
+    lines.push(`Signals:`);
+    for (const s of analysis.signals) {
+      lines.push(`  [${s.severity.toUpperCase()}] ${s.category}: ${s.detail}`);
+    }
+    lines.push(``);
+  }
+
+  lines.push(`Recommendation: ${analysis.recommendation}`);
+  return lines.join("\n");
 }
 
 export default function AnalysisPanel({ report, isLoading }: Props) {
@@ -19,10 +49,19 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
     );
   }
 
+  const [copied, setCopied] = useState(false);
+
   if (!report) return null;
 
   const analysis = report.audio_analysis || report.text_analysis;
   if (!analysis) return null;
+
+  const handleCopy = async () => {
+    const text = formatReportForClipboard(report);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="bg-gray-800 rounded-lg p-6 space-y-6">
@@ -57,6 +96,16 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
 
       {/* Recommendation */}
       <RecommendationBox recommendation={analysis.recommendation} />
+
+      {/* Copy Results button */}
+      <div className="flex justify-center pt-2">
+        <button
+          onClick={handleCopy}
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+        >
+          {copied ? "Copied!" : "Copy Results"}
+        </button>
+      </div>
     </div>
   );
 }

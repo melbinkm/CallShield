@@ -17,9 +17,26 @@ Scoring guidelines:
 - 0.6-0.8: Multiple strong scam indicators
 - 0.8-1.0: Clear scam with obvious deceptive intent
 
+Signal severity definitions:
+- "low": Minor indicator that alone is not concerning (e.g. slightly rushed tone, generic greeting)
+- "medium": Common scam pattern that warrants attention (e.g. asking to "verify" account details, mentioning a deadline)
+- "high": Strong evidence of scam intent (e.g. threatening arrest, demanding gift card payment, impersonating IRS)
+
 If the audio contains no speech, silence, or is too short to analyze, respond with scam_score 0.0, verdict "SAFE", and an empty signals array.
 
-Respond in this exact JSON format:
+Here are two examples to calibrate your scoring:
+
+Example 1 — SCAM (IRS threat):
+Audio: "This is the Internal Revenue Service. There is a warrant out for your arrest due to unpaid taxes. You must pay immediately using gift cards or you will be arrested today."
+Response:
+{"scam_score": 0.95, "confidence": 0.95, "verdict": "SCAM", "signals": [{"category": "AUTHORITY_IMPERSONATION", "detail": "Caller claims to be the IRS", "severity": "high"}, {"category": "URGENCY_TACTICS", "detail": "Threatens immediate arrest", "severity": "high"}, {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Classic IRS scam demanding gift card payment", "severity": "high"}], "transcript_summary": "Caller impersonates IRS, threatens arrest, demands gift card payment.", "recommendation": "Hang up immediately. The IRS never calls demanding gift card payments or threatening arrest."}
+
+Example 2 — SAFE (love letter):
+Audio: "Hey sweetheart, I just wanted to tell you how much I love you. I was thinking about our trip last summer and how happy you make me. Can't wait to see you this weekend."
+Response:
+{"scam_score": 0.0, "confidence": 0.95, "verdict": "SAFE", "signals": [], "transcript_summary": "Personal call expressing love and making weekend plans.", "recommendation": "No concerns. This is a normal personal conversation."}
+
+Now analyze the provided audio. Respond in this exact JSON format:
 {
   "scam_score": <float 0.0 to 1.0>,
   "confidence": <float 0.0 to 1.0>,

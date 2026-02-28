@@ -58,16 +58,25 @@ export function useStream() {
     type: string;
     total_chunks?: number;
     combined_score?: number;
+    max_score?: number;
     verdict?: string;
     signals?: Signal[];
+    recommendation?: string;
+    transcript_summary?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [audioLevel, setAudioLevel] = useState(0);
   const streamRef = useRef<MediaStream | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
       if (audioCtxRef.current) {
         audioCtxRef.current.close();
       }
@@ -98,6 +107,26 @@ export function useStream() {
         let sampleCount = 0;
         const CHUNK_SAMPLES = 16000 * 5; // 5 seconds
 
+        // Audio level visualization via AnalyserNode
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+        source.connect(analyser);
+        analyserRef.current = analyser;
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        const updateLevel = () => {
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+          setAudioLevel(avg / 255); // Normalize to 0-1
+          animFrameRef.current = requestAnimationFrame(updateLevel);
+        };
+        animFrameRef.current = requestAnimationFrame(updateLevel);
+
         processor.onaudioprocess = (e) => {
           const pcm = new Float32Array(e.inputBuffer.getChannelData(0));
           pcmBuffer.push(pcm);
@@ -122,7 +151,7 @@ export function useStream() {
 
         const gainNode = audioCtx.createGain();
         gainNode.gain.value = 0; // Zero volume to prevent echo
-        
+
         source.connect(processor);
         processor.connect(gainNode);
         audioCtxRef.current = audioCtx;
@@ -153,12 +182,20 @@ export function useStream() {
   }, []);
 
   const stopRecording = useCallback(() => {
+    // Stop audio level animation
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    analyserRef.current = null;
+    setAudioLevel(0);
+
     // Stop and cleanup media stream tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    
+
     if (audioCtxRef.current) {
       audioCtxRef.current.close();
       audioCtxRef.current = null;
@@ -170,5 +207,5 @@ export function useStream() {
     }
   }, []);
 
-  return { isRecording, partialResults, finalResult, error, startRecording, stopRecording };
+  return { isRecording, partialResults, finalResult, error, audioLevel, startRecording, stopRecording };
 }

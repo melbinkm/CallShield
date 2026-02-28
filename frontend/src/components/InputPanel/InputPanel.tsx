@@ -17,6 +17,8 @@ interface Props {
   cumulativeScore?: number;
   verdict?: string;
   recommendation?: string;
+  audioLevel?: number;
+  hasResults?: boolean;
 }
 
 export default function InputPanel({
@@ -31,6 +33,8 @@ export default function InputPanel({
   cumulativeScore,
   verdict,
   recommendation,
+  audioLevel,
+  hasResults,
 }: Props) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -47,6 +51,8 @@ export default function InputPanel({
             cumulativeScore={cumulativeScore}
             verdict={verdict}
             recommendation={recommendation}
+            audioLevel={audioLevel}
+            hasResults={hasResults}
           />
         )}
         {activeTab === "paste" && (

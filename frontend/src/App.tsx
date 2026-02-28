@@ -14,7 +14,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
   const [showLog, setShowLog] = useState(false);
   const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
-  const { isRecording, partialResults, error: streamError, startRecording, stopRecording } = useStream();
+  const { isRecording, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording } = useStream();
 
   // Compute deterministic values from partial results
   const lastResult = partialResults[partialResults.length - 1];
@@ -60,6 +60,8 @@ export default function App() {
           cumulativeScore={effectiveScore}
           verdict={cumulativeVerdict}
           recommendation={bestRecommendation}
+          audioLevel={audioLevel}
+          hasResults={partialResults.length > 0}
         />
 
         {error && (
@@ -80,6 +82,63 @@ export default function App() {
           visible={showLog}
           onToggle={() => setShowLog((v) => !v)}
         />
+
+        {/* Final summary card after recording stops */}
+        {!isRecording && finalResult && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-white text-center">Analysis Complete</h3>
+            <div className="flex flex-col items-center space-y-3">
+              <span className={`text-3xl font-bold ${
+                (finalResult.combined_score ?? 0) < 0.3 ? "text-green-400" :
+                (finalResult.combined_score ?? 0) < 0.6 ? "text-yellow-400" :
+                (finalResult.combined_score ?? 0) < 0.85 ? "text-orange-400" :
+                "text-red-400"
+              }`}>
+                {Math.round((finalResult.combined_score ?? 0) * 100)}%
+              </span>
+              <span className={`text-sm font-bold px-3 py-1 rounded ${
+                finalResult.verdict === "SAFE" ? "bg-green-900 text-green-300" :
+                finalResult.verdict === "SUSPICIOUS" ? "bg-yellow-900 text-yellow-300" :
+                finalResult.verdict === "LIKELY_SCAM" ? "bg-orange-900 text-orange-300" :
+                "bg-red-900 text-red-300"
+              }`}>
+                {finalResult.verdict?.replace("_", " ")}
+              </span>
+              <p className="text-gray-400 text-xs">
+                {finalResult.total_chunks} chunk{finalResult.total_chunks !== 1 ? "s" : ""} analyzed
+                {finalResult.max_score !== undefined && ` | Peak: ${Math.round(finalResult.max_score * 100)}%`}
+              </p>
+            </div>
+            {finalResult.transcript_summary && (
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Transcript Summary</h4>
+                <p className="text-gray-200 text-sm">{finalResult.transcript_summary}</p>
+              </div>
+            )}
+            {finalResult.signals && finalResult.signals.length > 0 && (
+              <div>
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">All Signals</h4>
+                <ul className="space-y-1">
+                  {finalResult.signals.map((s, i) => (
+                    <li key={i} className="text-xs text-gray-400">
+                      <span className={`font-semibold ${
+                        s.severity === "high" ? "text-red-400" :
+                        s.severity === "medium" ? "text-yellow-400" :
+                        "text-gray-300"
+                      }`}>[{s.category}]</span>{" "}
+                      {s.detail}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {finalResult.recommendation && (
+              <p className="text-sm text-blue-400 italic text-center">
+                {finalResult.recommendation}
+              </p>
+            )}
+          </div>
+        )}
 
         <AnalysisPanel report={report} isLoading={isAnalyzing} />
       </main>

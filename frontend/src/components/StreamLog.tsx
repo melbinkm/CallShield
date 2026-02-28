@@ -8,6 +8,7 @@ interface PartialResult {
   verdict?: string;
   signals?: Signal[];
   recommendation?: string;
+  transcript_summary?: string;
 }
 
 interface Props {
@@ -55,6 +56,11 @@ seconds)...</p>
                 <span className="text-gray-300">Cumulative: <b>{Math.round((r.cumulative_score ?? 0)
   * 100)}%</b></span>
               </div>
+              {r.transcript_summary && (
+                <p className="text-xs text-gray-300 bg-gray-800 rounded px-2 py-1 mb-2 italic">
+                  "{r.transcript_summary}"
+                </p>
+              )}
               {r.signals && r.signals.length > 0 && (
                 <ul className="space-y-1">
                   {r.signals.map((s, j) => (

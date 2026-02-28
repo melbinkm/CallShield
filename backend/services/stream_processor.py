@@ -30,6 +30,7 @@ class StreamProcessor:
     def __init__(self):
         self.chunk_index = 0
         self.cumulative_score = 0.0
+        self.max_score = 0.0
         self.all_signals = []
         self.last_recommendation = ""
         self.last_transcript_summary = ""
@@ -70,6 +71,9 @@ class StreamProcessor:
                     },
                 ],
             }],
+            "temperature": 0.3,
+            "top_p": 0.9,
+            "response_format": {"type": "json_object"},
         }).encode()
 
         req = urllib.request.Request(
@@ -99,11 +103,12 @@ class StreamProcessor:
         self.last_recommendation = data.get("recommendation", "")
         self.last_transcript_summary = data.get("transcript_summary", "")
 
-        # Update cumulative score with running average (chunk_index already incremented above)
-        self.cumulative_score = (
-            (self.cumulative_score * (self.chunk_index - 1) + chunk_score)
-            / self.chunk_index
-        )
+        # Update peak score
+        if chunk_score > self.max_score:
+            self.max_score = chunk_score
+
+        # Exponential weighting: recent/severe chunks weighted more
+        self.cumulative_score = 0.7 * chunk_score + 0.3 * self.cumulative_score
         self.all_signals.extend(signals)
 
         return {
@@ -111,6 +116,7 @@ class StreamProcessor:
             "chunk_index": self.chunk_index,
             "scam_score": round(chunk_score, 4),
             "cumulative_score": round(self.cumulative_score, 4),
+            "max_score": round(self.max_score, 4),
             "verdict": data.get("verdict", "SAFE"),
             "signals": signals,
             "recommendation": data.get("recommendation", ""),
@@ -126,6 +132,7 @@ class StreamProcessor:
             "type": "final_result",
             "total_chunks": self.chunk_index,
             "combined_score": round(self.cumulative_score, 4),
+            "max_score": round(self.max_score, 4),
             "verdict": verdict,
             "signals": self.all_signals,
             "recommendation": self.last_recommendation,

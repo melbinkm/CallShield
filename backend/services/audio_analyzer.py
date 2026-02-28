@@ -28,6 +28,9 @@ async def analyze_audio(audio_bytes: bytes) -> str:
                 },
             ],
         }],
+        "temperature": 0.3,
+        "top_p": 0.9,
+        "response_format": {"type": "json_object"},
     }).encode()
 
     req = urllib.request.Request(

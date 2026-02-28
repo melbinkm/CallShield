@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from "react";
+
 interface Props {
   isRecording: boolean;
   onStart: () => void;
@@ -5,9 +7,41 @@ interface Props {
   cumulativeScore?: number;
   verdict?: string;
   recommendation?: string;
+  audioLevel?: number;
+  hasResults?: boolean;
 }
 
-export default function MicRecorder({ isRecording, onStart, onStop, cumulativeScore, verdict, recommendation }: Props) {
+export default function MicRecorder({ isRecording, onStart, onStop, cumulativeScore, verdict, recommendation, audioLevel = 0, hasResults = false }: Props) {
+  const [countdown, setCountdown] = useState(5);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Countdown timer for first chunk wait
+  useEffect(() => {
+    if (isRecording && !hasResults) {
+      setCountdown(5);
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isRecording, hasResults]);
+
+  // Generate audio level bars
+  const bars = 5;
+  const barHeights = Array.from({ length: bars }, (_, i) => {
+    const threshold = (i + 1) / bars;
+    return audioLevel >= threshold ? 1 : audioLevel >= threshold - 0.1 ? 0.5 : 0.2;
+  });
+
   return (
     <div className="flex flex-col items-center space-y-6 py-8">
       <button
@@ -21,11 +55,40 @@ export default function MicRecorder({ isRecording, onStart, onStop, cumulativeSc
       >
         {isRecording ? "STOP" : "REC"}
       </button>
+
+      {/* Audio level visualization */}
+      {isRecording && (
+        <div className="flex items-end gap-1 h-8">
+          {barHeights.map((h, i) => (
+            <div
+              key={i}
+              className="w-2 rounded-sm transition-all duration-100"
+              style={{
+                height: `${Math.max(4, h * 32)}px`,
+                backgroundColor: audioLevel > 0.5
+                  ? "#f59e0b"
+                  : audioLevel > 0.2
+                  ? "#22c55e"
+                  : "#6b7280",
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <p className="text-gray-400 text-sm">
         {isRecording
           ? "Recording... Click to stop and get final analysis."
           : "Click to start recording from your microphone."}
       </p>
+
+      {/* Countdown timer while waiting for first chunk */}
+      {isRecording && !hasResults && (
+        <p className="text-blue-400 text-sm animate-pulse">
+          Analyzing first chunk... {countdown}s
+        </p>
+      )}
+
       {isRecording && cumulativeScore !== undefined && (
         <div className="flex flex-col items-center space-y-3">
           <p className="text-lg font-mono">
