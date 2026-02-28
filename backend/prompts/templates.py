@@ -9,6 +9,7 @@ Evaluate the following dimensions:
 4. EMOTIONAL MANIPULATION: Do they use fear, threats, or guilt to pressure compliance? (Note: genuine expressions of love, affection, or emotion are NOT manipulation)
 5. VOCAL PATTERNS: Aggressive tone, scripted speech, call-center background noise?
 6. KNOWN SCAM SCRIPTS: IRS threats, tech support fraud, romance scam soliciting money, prize notification, etc.
+7. ROBOCALL / IVR SCAM PATTERNS: Pre-recorded messages that ask you to "press 1" or "press a button" to speak to an agent or representative. Unsolicited calls about Medicare benefits, extended warranties, insurance offers, free products, or debt relief that use automated prompts to connect you to a live agent are VERY commonly scam robocalls and should score 0.6+ minimum.
 
 Scoring guidelines:
 - 0.0-0.2: Normal conversation, no scam indicators
@@ -36,6 +37,11 @@ Audio: "Hey sweetheart, I just wanted to tell you how much I love you. I was thi
 Response:
 {"scam_score": 0.0, "confidence": 0.95, "verdict": "SAFE", "signals": [], "transcript_summary": "Personal call expressing love and making weekend plans.", "recommendation": "No concerns. This is a normal personal conversation."}
 
+Example 3 — LIKELY_SCAM (robocall / press-to-connect):
+Audio: "Hi, this is a call about your Medicare benefits. You may qualify for additional coverage at no extra cost. Press 1 now to speak with a licensed representative about your options before enrollment closes."
+Response:
+{"scam_score": 0.75, "confidence": 0.90, "verdict": "LIKELY_SCAM", "signals": [{"category": "ROBOCALL_IVR", "detail": "Pre-recorded message asking recipient to press a button to connect to agent", "severity": "high"}, {"category": "URGENCY_TACTICS", "detail": "Implies enrollment deadline to pressure immediate action", "severity": "medium"}, {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Unsolicited Medicare benefits robocall — extremely common scam pattern", "severity": "high"}], "transcript_summary": "Automated robocall claiming Medicare benefits, urging press 1 to speak with representative.", "recommendation": "Hang up. Legitimate Medicare communications come by mail. Never press buttons on unsolicited robocalls."}
+
 Now analyze the provided audio. Respond in this exact JSON format:
 {
   "scam_score": <float 0.0 to 1.0>,
@@ -60,6 +66,7 @@ Look for these scam indicators:
 5. Unusual payment methods (gift cards, wire transfers, crypto)
 6. Pressure to keep the call secret
 7. Callback numbers that differ from official numbers
+8. Robocall / IVR patterns: pre-recorded messages asking to "press 1" or "press a button" to speak to an agent. Unsolicited calls about Medicare, extended warranties, insurance, free products, or debt relief using automated prompts are VERY commonly scams and should score 0.6+ minimum
 
 Scoring guidelines:
 - 0.0-0.2: Normal conversation, no scam indicators
