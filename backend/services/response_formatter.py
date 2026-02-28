@@ -22,11 +22,28 @@ def extract_json(raw: str) -> dict:
         except json.JSONDecodeError:
             pass
 
-    # Try finding first JSON object in the text
-    brace_match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if brace_match:
+    # Try finding balanced JSON object (handles nested braces properly)
+    def find_balanced_json(text: str) -> Optional[str]:
+        """Find first complete JSON object with balanced braces."""
+        start = text.find("{")
+        if start == -1:
+            return None
+        
+        depth = 0
+        for i in range(start, len(text)):
+            char = text[i]
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    return text[start:i+1]
+        return None
+    
+    json_str = find_balanced_json(raw)
+    if json_str:
         try:
-            return json.loads(brace_match.group(0))
+            return json.loads(json_str)
         except json.JSONDecodeError:
             pass
 
