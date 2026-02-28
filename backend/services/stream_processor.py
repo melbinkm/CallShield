@@ -2,10 +2,23 @@ import base64
 import json
 import asyncio
 import functools
+import struct
 import urllib.request
 from config import MISTRAL_API_KEY, AUDIO_MODEL
 from prompts.templates import SCAM_AUDIO_PROMPT
 from services.response_formatter import extract_json
+
+
+def is_silent(audio_bytes: bytes, threshold=500) -> bool:
+    """Check if WAV audio chunk is silence by looking at PCM amplitude."""
+    # Skip 44-byte WAV header
+    pcm_data = audio_bytes[44:]
+    if len(pcm_data) < 2:
+        return True
+    num_samples = len(pcm_data) // 2
+    samples = struct.unpack(f"<{num_samples}h", pcm_data[:num_samples * 2])
+    rms = (sum(s * s for s in samples) / num_samples) ** 0.5
+    return rms < threshold
 
 class StreamProcessor:
     def __init__(self):
@@ -15,6 +28,17 @@ class StreamProcessor:
 
     async def process_chunk(self, audio_chunk: bytes) -> dict:
         """Process a single audio chunk and return partial result."""
+        if is_silent(audio_chunk):
+            return {
+                "type": "partial_result",
+                "chunk_index": self.chunk_index,
+                "scam_score": 0.0,
+                "cumulative_score": round(self.cumulative_score, 4),
+                "verdict": "SAFE",
+                "signals": [{"category": "SILENCE", "detail": "No speech detected in this chunk",
+ "severity": "low"}],
+            }
+        
         audio_b64 = base64.b64encode(audio_chunk).decode("utf-8")
 
         payload = json.dumps({
