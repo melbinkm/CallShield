@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 import uuid
 
@@ -23,7 +23,7 @@ class AnalysisResult(BaseModel):
     scam_score: float = Field(ge=0.0, le=1.0)
     confidence: float = Field(ge=0.0, le=1.0)
     verdict: Verdict
-    signals: list[Signal] = []
+    signals: List[Signal] = []
     transcript_summary: Optional[str] = None
     recommendation: str
 
