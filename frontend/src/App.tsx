@@ -13,8 +13,16 @@ type Tab = "upload" | "record" | "paste";
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
   const [showLog, setShowLog] = useState(false);
-  const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
-  const { isRecording, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording } = useStream();
+  const { isAnalyzing, report, error, submitAudio, submitTranscript, clearResults } = useAnalyze();
+  const { isRecording, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording, clearStream } = useStream();
+
+  const hasAnyResults = report !== null || finalResult !== null || partialResults.length > 0;
+
+  const handleReset = () => {
+    clearResults();
+    clearStream();
+    setShowLog(false);
+  };
 
   // Compute deterministic values from partial results
   const lastResult = partialResults[partialResults.length - 1];
@@ -163,6 +171,17 @@ export default function App() {
         )}
 
         <AnalysisPanel report={report} isLoading={isAnalyzing} />
+
+        {hasAnyResults && !isRecording && !isAnalyzing && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleReset}
+              className="px-6 py-2 text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+            >
+              New Analysis
+            </button>
+          </div>
+        )}
       </main>
       <Footer />
       <StreamingIndicator isRecording={isRecording} cumulativeScore={partialResults[partialResults.length - 1]?.cumulative_score} />

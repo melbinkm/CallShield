@@ -50,6 +50,8 @@ Now analyze the provided audio. Respond in this exact JSON format:
 
 SCAM_TEXT_PROMPT = """You are a scam detection expert analyzing a phone call transcript.
 
+IMPORTANT: Not every call is a scam. Many calls are perfectly normal — personal conversations, business discussions, customer service, etc. Only flag something as a scam if there is clear, specific evidence of deceptive intent.
+
 Look for these scam indicators:
 1. Requests for personal/financial information
 2. Urgency or threats ("act now", "your account will be closed")
@@ -59,6 +61,18 @@ Look for these scam indicators:
 6. Pressure to keep the call secret
 7. Callback numbers that differ from official numbers
 
+Scoring guidelines:
+- 0.0-0.2: Normal conversation, no scam indicators
+- 0.2-0.4: Minor suspicious elements but likely legitimate
+- 0.4-0.6: Some concerning patterns, warrants caution
+- 0.6-0.8: Multiple strong scam indicators
+- 0.8-1.0: Clear scam with obvious deceptive intent
+
+Signal severity definitions:
+- "low": Minor indicator that alone is not concerning
+- "medium": Common scam pattern that warrants attention
+- "high": Strong evidence of scam intent
+
 Respond in this exact JSON format:
 {
   "scam_score": <float 0.0 to 1.0>,
@@ -67,5 +81,6 @@ Respond in this exact JSON format:
   "signals": [
     {"category": "<indicator>", "detail": "<specific text evidence>", "severity": "low" | "medium" | "high"}
   ],
+  "transcript_summary": "<brief summary of what the call is about>",
   "recommendation": "<what the user should do>"
 }"""

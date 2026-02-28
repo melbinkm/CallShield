@@ -93,7 +93,12 @@ class StreamProcessor:
 
         try:
             body = json.loads(resp.read().decode())
-            raw = body["choices"][0]["message"]["content"]
+            choices = body.get("choices")
+            if not choices or not isinstance(choices, list) or len(choices) == 0:
+                raise ValueError(f"Unexpected API response structure: no choices")
+            raw = choices[0].get("message", {}).get("content", "")
+            if not raw:
+                raise ValueError("Empty content in API response")
             data = extract_json(raw)
         finally:
             resp.close()

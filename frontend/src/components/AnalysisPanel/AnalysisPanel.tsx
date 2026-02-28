@@ -57,10 +57,14 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
   if (!analysis) return null;
 
   const handleCopy = async () => {
-    const text = formatReportForClipboard(report);
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      const text = formatReportForClipboard(report);
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (

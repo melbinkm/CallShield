@@ -71,6 +71,7 @@ export function useStream() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const intentionalCloseRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -90,6 +91,7 @@ export function useStream() {
     setError(null);
     setPartialResults([]);
     setFinalResult(null);
+    intentionalCloseRef.current = false;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -174,14 +176,20 @@ export function useStream() {
         }
       };
 
-      ws.onerror = () => setError("WebSocket connection failed");
-      ws.onclose = () => setIsRecording(false);
+      ws.onerror = () => setError("WebSocket connection failed. Is the backend running?");
+      ws.onclose = () => {
+        setIsRecording(false);
+        if (!intentionalCloseRef.current) {
+          setError("Connection lost. Recording stopped.");
+        }
+      };
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not access microphone");
     }
   }, []);
 
   const stopRecording = useCallback(() => {
+    intentionalCloseRef.current = true;
     // Stop audio level animation
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
@@ -208,5 +216,11 @@ export function useStream() {
     }
   }, []);
 
-  return { isRecording, partialResults, finalResult, error, audioLevel, startRecording, stopRecording };
+  const clearStream = useCallback(() => {
+    setPartialResults([]);
+    setFinalResult(null);
+    setError(null);
+  }, []);
+
+  return { isRecording, partialResults, finalResult, error, audioLevel, startRecording, stopRecording, clearStream };
 }

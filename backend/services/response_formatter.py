@@ -79,7 +79,7 @@ def parse_analysis_result(raw: str) -> AnalysisResult:
     
     return AnalysisResult(
         scam_score=clamped_score,
-        confidence=float(data.get("confidence", 0.5)),
+        confidence=max(0.0, min(1.0, float(data.get("confidence", 0.5)))),
         verdict=raw_verdict,
         signals=signals,
         transcript_summary=data.get("transcript_summary"),

@@ -50,6 +50,12 @@ async def analyze_audio(audio_bytes: bytes) -> str:
 
     try:
         body = json.loads(resp.read().decode())
-        return body["choices"][0]["message"]["content"]
+        choices = body.get("choices")
+        if not choices or not isinstance(choices, list) or len(choices) == 0:
+            raise ValueError(f"Unexpected API response structure: no choices")
+        content = choices[0].get("message", {}).get("content", "")
+        if not content:
+            raise ValueError("Empty content in API response")
+        return content
     finally:
         resp.close()

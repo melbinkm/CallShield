@@ -9,8 +9,13 @@ MISTRAL_API_KEY = os.environ.get("MISTRAL_API_KEY")
 if not MISTRAL_API_KEY:
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     secrets_path = os.path.join(project_root, ".secrets", "mistral_api_key")
-    with open(secrets_path, "r") as f:
-        MISTRAL_API_KEY = f.read().strip()
+    try:
+        with open(secrets_path, "r") as f:
+            MISTRAL_API_KEY = f.read().strip()
+    except FileNotFoundError:
+        raise RuntimeError(
+            "MISTRAL_API_KEY not set. Set the env var or create .secrets/mistral_api_key"
+        )
 AUDIO_MODEL = "voxtral-mini-latest"
 TEXT_MODEL = "mistral-large-latest"
 MAX_AUDIO_SIZE_MB = 25
