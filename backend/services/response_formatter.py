@@ -2,6 +2,7 @@ import json
 import re
 from models.schemas import AnalysisResult, ScamReport, Signal, Verdict, Severity
 from typing import Optional
+from config import THRESHOLD_SAFE, THRESHOLD_SUSPICIOUS, THRESHOLD_LIKELY_SCAM
 import time
 import uuid
 
@@ -51,6 +52,17 @@ def parse_analysis_result(raw: str) -> AnalysisResult:
         transcript_summary=data.get("transcript_summary"),
         recommendation=data.get("recommendation", "No specific recommendation."),
     )
+
+def score_to_verdict(score: float) -> str:
+    """Convert a scam score to a verdict string."""
+    if score < THRESHOLD_SAFE:
+        return "SAFE"
+    elif score < THRESHOLD_SUSPICIOUS:
+        return "SUSPICIOUS"
+    elif score < THRESHOLD_LIKELY_SCAM:
+        return "LIKELY_SCAM"
+    else:
+        return "SCAM"
 
 def build_scam_report(
     mode: str,

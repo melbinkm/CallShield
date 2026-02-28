@@ -28,22 +28,29 @@ async def analyze_audio_endpoint(file: UploadFile = File(...)):
             detail={"error": "file_too_large", "detail": f"File exceeds {MAX_AUDIO_SIZE_MB}MB limit."},
         )
 
+    # Validate WAV magic bytes
+    if len(audio_bytes) >= 12 and (audio_bytes[:4] != b'RIFF' or audio_bytes[8:12] != b'WAVE'):
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "invalid_file_type", "detail": "File is not a valid WAV format."},
+        )
+
     # Call Voxtral audio analysis
     try:
         raw_response = await analyze_audio(audio_bytes)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=502,
-            detail={"error": "model_error", "detail": f"Mistral API error: {str(e)}"},
+            detail={"error": "model_error", "detail": "Audio analysis service temporarily unavailable"},
         )
 
     # Parse response
     try:
         audio_result = parse_analysis_result(raw_response)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=502,
-            detail={"error": "parse_error", "detail": f"Could not parse model response: {str(e)}"},
+            detail={"error": "parse_error", "detail": "Failed to process analysis results"},
         )
 
     # Build and return report
@@ -68,19 +75,19 @@ async def analyze_transcript_endpoint(request: TranscriptRequest):
     # Call Mistral text analysis
     try:
         raw_response = await analyze_text(transcript)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=502,
-            detail={"error": "model_error", "detail": f"Mistral API error: {str(e)}"},
+            detail={"error": "model_error", "detail": "Text analysis service temporarily unavailable"},
         )
 
     # Parse response
     try:
         text_result = parse_analysis_result(raw_response)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=502,
-            detail={"error": "parse_error", "detail": f"Could not parse model response: {str(e)}"},
+            detail={"error": "parse_error", "detail": "Failed to process analysis results"},
         )
 
     # Build and return report

@@ -1,11 +1,13 @@
 import base64
+import asyncio
 from config import client, AUDIO_MODEL
 from prompts.templates import SCAM_AUDIO_PROMPT
 
 async def analyze_audio(audio_bytes: bytes) -> str:
     """Send audio to Voxtral chat completions and return raw response text."""
     audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-    response = client.chat.complete(
+    response = await asyncio.to_thread(
+        client.chat.complete,
         model=AUDIO_MODEL,
         messages=[
             {

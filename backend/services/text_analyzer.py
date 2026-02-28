@@ -1,9 +1,11 @@
+import asyncio
 from config import client, TEXT_MODEL
 from prompts.templates import SCAM_TEXT_PROMPT
 
 async def analyze_transcript(transcript: str) -> str:
     """Send transcript to Mistral chat completions and return raw response text."""
-    response = client.chat.complete(
+    response = await asyncio.to_thread(
+        client.chat.complete,
         model=TEXT_MODEL,
         messages=[
             {

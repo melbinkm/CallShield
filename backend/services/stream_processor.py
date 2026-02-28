@@ -1,5 +1,6 @@
 import base64
 import json
+import asyncio
 from config import client, AUDIO_MODEL
 from prompts.templates import SCAM_AUDIO_PROMPT
 from services.response_formatter import extract_json
@@ -14,7 +15,8 @@ class StreamProcessor:
         """Process a single audio chunk and return partial result."""
         audio_b64 = base64.b64encode(audio_chunk).decode("utf-8")
 
-        response = client.chat.complete(
+        response = await asyncio.to_thread(
+            client.chat.complete,
             model=AUDIO_MODEL,
             messages=[
                 {
@@ -58,14 +60,8 @@ class StreamProcessor:
 
     def get_final_result(self) -> dict:
         """Return the final aggregated result."""
-        if self.cumulative_score < 0.3:
-            verdict = "SAFE"
-        elif self.cumulative_score < 0.6:
-            verdict = "SUSPICIOUS"
-        elif self.cumulative_score < 0.85:
-            verdict = "LIKELY_SCAM"
-        else:
-            verdict = "SCAM"
+        from services.response_formatter import score_to_verdict
+        verdict = score_to_verdict(self.cumulative_score)
 
         return {
             "type": "final_result",
