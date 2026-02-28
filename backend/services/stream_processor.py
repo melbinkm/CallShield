@@ -36,6 +36,9 @@ class StreamProcessor:
 
     async def process_chunk(self, audio_chunk: bytes) -> dict:
         """Process a single audio chunk and return partial result."""
+        # Always increment chunk_index to avoid duplicates
+        self.chunk_index += 1
+        
         if is_silent(audio_chunk):
             return {
                 "type": "partial_result",
