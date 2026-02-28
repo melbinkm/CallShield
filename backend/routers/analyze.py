@@ -74,7 +74,12 @@ async def analyze_transcript_endpoint(request: TranscriptRequest):
     if not transcript:
         raise HTTPException(
             status_code=400,
-            detail={"error": "transcript_too_long", "detail": "Transcript cannot be empty."},
+            detail={"error": "transcript_empty", "detail": "Transcript cannot be empty."},
+        )
+    if len(transcript) > MAX_TRANSCRIPT_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "transcript_too_long", "detail": f"Transcript exceeds {MAX_TRANSCRIPT_LENGTH} character limit."},
         )
 
     # Call Mistral text analysis
