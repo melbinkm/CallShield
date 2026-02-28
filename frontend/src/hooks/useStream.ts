@@ -11,6 +11,44 @@ interface PartialResult {
   signals?: Signal[];
 }
 
+// WAV encoder helpers
+function writeString(view: DataView, offset: number, str: string) {
+  for (let i = 0; i < str.length; i++) {
+    view.setUint8(offset + i, str.charCodeAt(i));
+  }
+}
+
+function encodeWAV(samples: Float32Array, sampleRate: number): ArrayBuffer {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  // RIFF header
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(view, 8, "WAVE");
+
+  // fmt chunk
+  writeString(view, 12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);          // PCM
+  view.setUint16(22, 1, true);          // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);         // 16-bit
+
+  // data chunk
+  writeString(view, 36, "data");
+  view.setUint32(40, samples.length * 2, true);
+
+  // PCM samples (float32 → int16)
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return buffer;
+}
+
 export function useStream() {
   const [isRecording, setIsRecording] = useState(false);
   const [partialResults, setPartialResults] = useState<PartialResult[]>([]);
@@ -23,13 +61,12 @@ export function useStream() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     return () => {
-      if (recorderRef.current && recorderRef.current.state !== "inactive") {
-        recorderRef.current.stop();
-        recorderRef.current.stream.getTracks().forEach((t) => t.stop());
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
       }
       if (wsRef.current) {
         wsRef.current.close();
@@ -50,17 +87,21 @@ export function useStream() {
       ws.onopen = () => {
         setIsRecording(true);
 
-        const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-        recorderRef.current = recorder;
+        const audioCtx = new AudioContext({ sampleRate: 16000 });
+        const source = audioCtx.createMediaStreamSource(stream);
+        const processor = audioCtx.createScriptProcessor(16000 * 5, 1, 1); // 5 sec chunks
 
-        recorder.ondataavailable = (e) => {
-          if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
-            ws.send(e.data);
+        processor.onaudioprocess = (e) => {
+          const pcm = e.inputBuffer.getChannelData(0);
+          const wavBytes = encodeWAV(pcm, 16000);
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(wavBytes);
           }
         };
 
-        // Send chunks every 5 seconds
-        recorder.start(5000);
+        source.connect(processor);
+        processor.connect(audioCtx.destination);
+        audioCtxRef.current = audioCtx;
       };
 
       ws.onmessage = (e) => {
@@ -88,9 +129,9 @@ export function useStream() {
   }, []);
 
   const stopRecording = useCallback(() => {
-    if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      recorderRef.current.stop();
-      recorderRef.current.stream.getTracks().forEach((t) => t.stop());
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
     }
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: "end_stream" }));
