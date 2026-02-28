@@ -45,5 +45,8 @@ async def analyze_audio(audio_bytes: bytes) -> str:
         functools.partial(urllib.request.urlopen, req, timeout=120),
     )
 
-    body = json.loads(resp.read().decode())
-    return body["choices"][0]["message"]["content"]
+    try:
+        body = json.loads(resp.read().decode())
+        return body["choices"][0]["message"]["content"]
+    finally:
+        resp.close()

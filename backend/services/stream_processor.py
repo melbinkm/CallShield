@@ -78,9 +78,12 @@ class StreamProcessor:
             functools.partial(urllib.request.urlopen, req, timeout=120),
         )
 
-        body = json.loads(resp.read().decode())
-        raw = body["choices"][0]["message"]["content"]
-        data = extract_json(raw)
+        try:
+            body = json.loads(resp.read().decode())
+            raw = body["choices"][0]["message"]["content"]
+            data = extract_json(raw)
+        finally:
+            resp.close()
 
         chunk_score = float(data.get("scam_score", 0.0))
         signals = data.get("signals", [])
