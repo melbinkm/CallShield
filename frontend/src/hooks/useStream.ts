@@ -89,13 +89,30 @@ export function useStream() {
 
         const audioCtx = new AudioContext({ sampleRate: 16000 });
         const source = audioCtx.createMediaStreamSource(stream);
-        const processor = audioCtx.createScriptProcessor(16000 * 5, 1, 1); // 5 sec chunks
+        const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        let pcmBuffer: Float32Array[] = [];
+        let sampleCount = 0;
+        const CHUNK_SAMPLES = 16000 * 5; // 5 seconds
 
         processor.onaudioprocess = (e) => {
-          const pcm = e.inputBuffer.getChannelData(0);
-          const wavBytes = encodeWAV(pcm, 16000);
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(wavBytes);
+          const pcm = new Float32Array(e.inputBuffer.getChannelData(0));
+          pcmBuffer.push(pcm);
+          sampleCount += pcm.length;
+
+          if (sampleCount >= CHUNK_SAMPLES) {
+            // Merge buffers
+            const merged = new Float32Array(sampleCount);
+            let offset = 0;
+            for (const buf of pcmBuffer) {
+              merged.set(buf, offset);
+              offset += buf.length;
+            }
+            const wavBytes = encodeWAV(merged, 16000);
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(wavBytes);
+            }
+            pcmBuffer = [];
+            sampleCount = 0;
           }
         };
 
