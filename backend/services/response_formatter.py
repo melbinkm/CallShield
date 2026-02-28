@@ -1,6 +1,7 @@
 import json
 import re
 from models.schemas import AnalysisResult, ScamReport, Signal, Verdict, Severity
+from typing import Optional
 import time
 import uuid
 
@@ -53,8 +54,8 @@ def parse_analysis_result(raw: str) -> AnalysisResult:
 
 def build_scam_report(
     mode: str,
-    audio_result: AnalysisResult | None = None,
-    text_result: AnalysisResult | None = None,
+    audio_result: Optional[AnalysisResult] = None,
+    text_result: Optional[AnalysisResult] = None,
     start_time: float = 0.0,
 ) -> ScamReport:
     """Build a unified ScamReport from one or both analysis results."""
