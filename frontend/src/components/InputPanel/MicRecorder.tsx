@@ -15,6 +15,7 @@ export default function MicRecorder({ isRecording, onStart, onStop, cumulativeSc
             ? "bg-red-600 hover:bg-red-700 animate-pulse"
             : "bg-blue-600 hover:bg-blue-700"
         }`}
+        aria-label={isRecording ? "Stop recording" : "Start recording"}
       >
         {isRecording ? "STOP" : "REC"}
       </button>

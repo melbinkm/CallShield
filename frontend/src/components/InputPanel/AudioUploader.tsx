@@ -9,13 +9,21 @@ interface Props {
 export default function AudioUploader({ onFileSelect, disabled }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(file: File) {
     if (!file.name.toLowerCase().endsWith(".wav")) {
-      alert("Only WAV files are accepted.");
+      setError("Only WAV files are accepted.");
       return;
     }
+
+    if (file.size > 25 * 1024 * 1024) {
+      setError("File exceeds 25MB limit");
+      return;
+    }
+
+    setError(null);
     setFileName(file.name);
     onFileSelect(file);
   }
@@ -43,6 +51,7 @@ export default function AudioUploader({ onFileSelect, disabled }: Props) {
           ? "border-blue-500 bg-blue-500/10"
           : "border-gray-600 hover:border-gray-400"
       } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+      aria-label="Upload audio file"
     >
       <input
         ref={inputRef}
@@ -64,6 +73,7 @@ export default function AudioUploader({ onFileSelect, disabled }: Props) {
           <p className="text-gray-500 text-sm">Max 25MB, WAV format only</p>
         </>
       )}
+      {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
     </div>
   );
 }

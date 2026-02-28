@@ -1,11 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
+import type { ScamReport } from "./types/scamReport";
 
-export async function analyzeAudio(file: File): Promise<any> {
+export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<ScamReport> {
   const formData = new FormData();
   formData.append("file", file);
   const response = await fetch(`${API_URL}/api/analyze/audio`, {
     method: "POST",
     body: formData,
+    signal,
   });
   if (!response.ok) {
     const err = await response.json();
@@ -14,11 +16,12 @@ export async function analyzeAudio(file: File): Promise<any> {
   return response.json();
 }
 
-export async function analyzeTranscript(transcript: string): Promise<any> {
+export async function analyzeTranscript(transcript: string, signal?: AbortSignal): Promise<ScamReport> {
   const response = await fetch(`${API_URL}/api/analyze/transcript`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ transcript }),
+    signal,
   });
   if (!response.ok) {
     const err = await response.json();

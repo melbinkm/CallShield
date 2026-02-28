@@ -13,7 +13,7 @@ const tabs: { id: Tab; label: string }[] = [
 
 export default function TabSelector({ activeTab, onTabChange }: Props) {
   return (
-    <div className="flex border-b border-gray-700">
+    <div className="flex border-b border-gray-700" role="tablist">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -23,6 +23,8 @@ export default function TabSelector({ activeTab, onTabChange }: Props) {
               ? "text-white border-b-2 border-blue-500"
               : "text-gray-400 hover:text-gray-200"
           }`}
+          role="tab"
+          aria-selected={activeTab === tab.id}
         >
           {tab.label}
         </button>

@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { createStreamSocket } from "../api/client";
+import type { Signal } from "../types/scamReport";
 
 interface PartialResult {
   type: string;
@@ -7,16 +8,34 @@ interface PartialResult {
   scam_score?: number;
   cumulative_score?: number;
   verdict?: string;
-  signals?: any[];
+  signals?: Signal[];
 }
 
 export function useStream() {
   const [isRecording, setIsRecording] = useState(false);
   const [partialResults, setPartialResults] = useState<PartialResult[]>([]);
-  const [finalResult, setFinalResult] = useState<any | null>(null);
+  const [finalResult, setFinalResult] = useState<{
+    type: string;
+    total_chunks?: number;
+    combined_score?: number;
+    verdict?: string;
+    signals?: Signal[];
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+        recorderRef.current.stream.getTracks().forEach((t) => t.stop());
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -45,13 +64,19 @@ export function useStream() {
       };
 
       ws.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        if (data.type === "partial_result") {
-          setPartialResults((prev) => [...prev, data]);
-        } else if (data.type === "final_result") {
-          setFinalResult(data);
-        } else if (data.type === "error") {
-          setError(data.detail);
+        try {
+          const data = JSON.parse(e.data);
+          if (!data.type) return;
+
+          if (data.type === "partial_result") {
+            setPartialResults((prev) => [...prev, data]);
+          } else if (data.type === "final_result") {
+            setFinalResult(data);
+          } else if (data.type === "error") {
+            setError(data.detail);
+          }
+        } catch (err) {
+          setError("Invalid message from server");
         }
       };
 
@@ -69,6 +94,7 @@ export function useStream() {
     }
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: "end_stream" }));
+      wsRef.current.close();
     }
   }, []);
 
