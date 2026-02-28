@@ -62,6 +62,7 @@ export function useStream() {
     signals?: Signal[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -83,6 +84,7 @@ export function useStream() {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const ws = createStreamSocket();
       wsRef.current = ws;
 
@@ -148,6 +150,12 @@ export function useStream() {
   }, []);
 
   const stopRecording = useCallback(() => {
+    // Stop and cleanup media stream tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
     if (audioCtxRef.current) {
       audioCtxRef.current.close();
       audioCtxRef.current = null;
