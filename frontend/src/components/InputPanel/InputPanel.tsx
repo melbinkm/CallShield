@@ -15,6 +15,8 @@ interface Props {
   onStartRecording?: () => void;
   onStopRecording?: () => void;
   cumulativeScore?: number;
+  verdict?: string;
+  recommendation?: string;
 }
 
 export default function InputPanel({
@@ -27,6 +29,8 @@ export default function InputPanel({
   onStartRecording,
   onStopRecording,
   cumulativeScore,
+  verdict,
+  recommendation,
 }: Props) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -41,6 +45,8 @@ export default function InputPanel({
             onStart={onStartRecording || (() => {})}
             onStop={onStopRecording || (() => {})}
             cumulativeScore={cumulativeScore}
+            verdict={verdict}
+            recommendation={recommendation}
           />
         )}
         {activeTab === "paste" && (

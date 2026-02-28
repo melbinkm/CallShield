@@ -30,6 +30,8 @@ export default function App() {
           onStartRecording={startRecording}
           onStopRecording={stopRecording}
           cumulativeScore={partialResults[partialResults.length - 1]?.cumulative_score}
+          verdict={partialResults[partialResults.length - 1]?.verdict}
+          recommendation={partialResults[partialResults.length - 1]?.recommendation}
         />
 
         {error && (
