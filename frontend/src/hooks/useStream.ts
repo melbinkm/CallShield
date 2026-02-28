@@ -120,8 +120,11 @@ export function useStream() {
           }
         };
 
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0; // Zero volume to prevent echo
+        
         source.connect(processor);
-        processor.connect(audioCtx.destination);
+        processor.connect(gainNode);
         audioCtxRef.current = audioCtx;
       };
 
