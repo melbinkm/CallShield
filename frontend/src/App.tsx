@@ -24,6 +24,10 @@ export default function App() {
           onFileSelect={submitAudio}
           onTranscriptSubmit={submitTranscript}
           disabled={isAnalyzing || isRecording}
+          isRecording={isRecording}
+          onStartRecording={startRecording}
+          onStopRecording={stopRecording}
+          cumulativeScore={partialResults[partialResults.length - 1]?.cumulative_score}
         />
 
         {error && (

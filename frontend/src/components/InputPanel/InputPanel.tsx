@@ -11,6 +11,10 @@ interface Props {
   onFileSelect: (file: File) => void;
   onTranscriptSubmit: (text: string) => void;
   disabled?: boolean;
+  isRecording?: boolean;
+  onStartRecording?: () => void;
+  onStopRecording?: () => void;
+  cumulativeScore?: number;
 }
 
 export default function InputPanel({
@@ -29,9 +33,10 @@ export default function InputPanel({
         )}
         {activeTab === "record" && (
           <MicRecorder
-            isRecording={false}
-            onStart={() => {}}
-            onStop={() => {}}
+            isRecording={isRecording || false}
+            onStart={onStartRecording || (() => {})}
+            onStop={onStopRecording || (() => {})}
+            cumulativeScore={cumulativeScore}
           />
         )}
         {activeTab === "paste" && (
