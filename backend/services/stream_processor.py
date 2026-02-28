@@ -15,10 +15,14 @@ def is_silent(audio_bytes: bytes, threshold=500) -> bool:
     pcm_data = audio_bytes[44:]
     if len(pcm_data) < 2:
         return True
-    num_samples = len(pcm_data) // 2
-    samples = struct.unpack(f"<{num_samples}h", pcm_data[:num_samples * 2])
-    rms = (sum(s * s for s in samples) / num_samples) ** 0.5
-    return rms < threshold
+    try:
+        num_samples = len(pcm_data) // 2
+        samples = struct.unpack(f"<{num_samples}h", pcm_data[:num_samples * 2])
+        rms = (sum(s * s for s in samples) / num_samples) ** 0.5
+        return rms < threshold
+    except (struct.error, ValueError):
+        # Corrupted header or invalid data - treat as silent
+        return True
 
 class StreamProcessor:
     def __init__(self):
