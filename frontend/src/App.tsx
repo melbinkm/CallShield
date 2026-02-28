@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import InputPanel from "./components/InputPanel/InputPanel";
 import AnalysisPanel from "./components/AnalysisPanel/AnalysisPanel";
 import StreamingIndicator from "./components/StreamingIndicator";
+import StreamLog from "./components/StreamLog";
 import { useAnalyze } from "./hooks/useAnalyze";
 import { useStream } from "./hooks/useStream";
 
@@ -11,6 +12,7 @@ type Tab = "upload" | "record" | "paste";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("upload");
+  const [showLog, setShowLog] = useState(false);
   const { isAnalyzing, report, error, submitAudio, submitTranscript } = useAnalyze();
   const { isRecording, partialResults, error: streamError, startRecording, stopRecording } = useStream();
 
@@ -41,6 +43,13 @@ export default function App() {
             {streamError}
           </div>
         )}
+
+        <StreamLog
+          results={partialResults}
+          isRecording={isRecording}
+          visible={showLog}
+          onToggle={() => setShowLog((v) => !v)}
+        />
 
         <AnalysisPanel report={report} isLoading={isAnalyzing} />
       </main>
