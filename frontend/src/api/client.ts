@@ -11,8 +11,12 @@ export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<Sc
     signal,
   });
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.detail?.detail || err.detail || "Audio analysis failed");
+    try {
+      const err = await response.json();
+      throw new Error(err.detail?.detail || err.detail || "Audio analysis failed");
+    } catch {
+      throw new Error(response.statusText || "Audio analysis failed");
+    }
   }
   return response.json();
 }
@@ -25,8 +29,12 @@ export async function analyzeTranscript(transcript: string, signal?: AbortSignal
     signal,
   });
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.detail?.detail || err.detail || "Transcript analysis failed");
+    try {
+      const err = await response.json();
+      throw new Error(err.detail?.detail || err.detail || "Transcript analysis failed");
+    } catch {
+      throw new Error(response.statusText || "Transcript analysis failed");
+    }
   }
   return response.json();
 }
