@@ -82,8 +82,8 @@ export function useStream() {
 
       ws.onerror = () => setError("WebSocket connection failed");
       ws.onclose = () => setIsRecording(false);
-    } catch (err: any) {
-      setError(err.message || "Could not access microphone");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Could not access microphone");
     }
   }, []);
 

@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
-import type { ScamReport } from "./types/scamReport";
+import type { ScamReport } from "../types/scamReport";
 
 export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<ScamReport> {
   const formData = new FormData();
