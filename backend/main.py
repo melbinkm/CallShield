@@ -9,7 +9,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5177",
         "https://localhost:5177",
-        "https://scam-detector-frontend.onrender.com",
+        "https://callshield-ui.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
