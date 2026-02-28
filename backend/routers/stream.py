@@ -35,7 +35,12 @@ async def stream_audio(ws: WebSocket):
 
             # Check for text message (end signal)
             if "text" in message:
-                data = json.loads(message["text"])
+                try:
+                    data = json.loads(message["text"])
+                except json.JSONDecodeError as e:
+                    import logging
+                    logging.getLogger(__name__).warning("Invalid JSON received: %s", e)
+                    continue
                 if data.get("type") == "end_stream":
                     final = processor.get_final_result()
                     try:
