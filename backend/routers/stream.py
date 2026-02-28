@@ -11,7 +11,10 @@ MAX_CHUNKS = 60
 @router.websocket("/ws/stream")
 async def stream_audio(ws: WebSocket):
     await ws.accept()
-    await ws.send_json({"type": "connected"})
+    try:
+        await ws.send_json({"type": "connected"})
+    except Exception:
+        pass
 
     processor = StreamProcessor()
     chunk_count = 0
@@ -21,10 +24,13 @@ async def stream_audio(ws: WebSocket):
             try:
                 message = await asyncio.wait_for(ws.receive(), timeout=30.0)
             except asyncio.TimeoutError:
-                await ws.send_json({
-                    "type": "error",
-                    "detail": "Chunk timeout: no data received",
-                })
+                try:
+                    await ws.send_json({
+                        "type": "error",
+                        "detail": "Chunk timeout: no data received",
+                    })
+                except Exception:
+                    pass
                 break
 
             # Check for text message (end signal)
@@ -32,30 +38,45 @@ async def stream_audio(ws: WebSocket):
                 data = json.loads(message["text"])
                 if data.get("type") == "end_stream":
                     final = processor.get_final_result()
-                    await ws.send_json(final)
+                    try:
+                        await ws.send_json(final)
+                    except Exception:
+                        pass
                     break
 
             # Binary audio chunk
             if "bytes" in message:
                 audio_chunk = message["bytes"]
                 if len(audio_chunk) > MAX_CHUNK_SIZE:
-                    await ws.send_json({
-                        "type": "error",
-                        "detail": "Chunk too large",
-                    })
+                    try:
+                        await ws.send_json({
+                            "type": "error",
+                            "detail": "Chunk too large",
+                        })
+                    except Exception:
+                        pass
                     continue
 
                 try:
                     partial = await processor.process_chunk(audio_chunk)
-                    await ws.send_json(partial)
+                    try:
+                        await ws.send_json(partial)
+                    except Exception:
+                        pass
                     chunk_count += 1
                 except Exception:
-                    await ws.send_json({
-                        "type": "error",
-                        "detail": "Failed to process audio chunk",
-                    })
+                    try:
+                        await ws.send_json({
+                            "type": "error",
+                            "detail": "Failed to process audio chunk",
+                        })
+                    except Exception:
+                        pass
 
     except WebSocketDisconnect:
         pass
     finally:
-        await ws.close()
+        try:
+            await ws.close()
+        except Exception:
+            pass
