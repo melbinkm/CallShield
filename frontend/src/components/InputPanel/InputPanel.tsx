@@ -1,6 +1,7 @@
 import TabSelector from "./TabSelector";
 import AudioUploader from "./AudioUploader";
 import TranscriptPaster from "./TranscriptPaster";
+import MicRecorder from "./MicRecorder";
 
 type Tab = "upload" | "record" | "paste";
 
@@ -27,9 +28,11 @@ export default function InputPanel({
           <AudioUploader onFileSelect={onFileSelect} disabled={disabled} />
         )}
         {activeTab === "record" && (
-          <div className="text-center text-gray-400 py-12">
-            Mic recording coming in Phase 10
-          </div>
+          <MicRecorder
+            isRecording={false}
+            onStart={() => {}}
+            onStop={() => {}}
+          />
         )}
         {activeTab === "paste" && (
           <TranscriptPaster onTranscriptSubmit={onTranscriptSubmit} disabled={disabled} />
