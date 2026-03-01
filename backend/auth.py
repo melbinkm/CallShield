@@ -8,8 +8,9 @@ scripts/generate_api_key.py.
 import json
 import logging
 import os
-from fastapi import HTTPException
+from fastapi import HTTPException, Security
 from fastapi.security import APIKeyHeader
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def verify_api_key(key: str) -> bool:
     return entry.get("active", False)
 
 
-async def require_api_key(api_key: str = _api_key_header):
+async def require_api_key(api_key: Optional[str] = Security(_api_key_header)):
     """FastAPI dependency for API key authentication.
 
     - No keys configured → open access (returns None)
