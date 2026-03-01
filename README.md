@@ -38,6 +38,12 @@
 </p>
 
 <p align="center">
+  <video src="docs/screenshots/CallShield__Listening_for_Lies.mp4" controls width="700"></video>
+  <br>
+  <em>CallShield: Listening for Lies — what the industry gets wrong and how native audio intelligence fixes it</em>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — live verdict generation" width="700">
   <br>
   <em>Live mic recording → Voxtral scores each 5s chunk in real time → verdict builds as the call progresses</em>
