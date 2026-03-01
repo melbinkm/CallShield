@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from enum import Enum
+from datetime import datetime, timezone
 import uuid
 
 class Severity(str, Enum):
@@ -38,6 +39,7 @@ class ScamReport(BaseModel):
     processing_time_ms: float
     review_required: bool = False
     review_reason: Optional[str] = None
+    analyzed_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 class TranscriptRequest(BaseModel):
     transcript: str = Field(max_length=10000)

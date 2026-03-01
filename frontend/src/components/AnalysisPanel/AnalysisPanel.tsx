@@ -153,6 +153,35 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
         </div>
       )}
 
+      {/* Trust Panel */}
+      <div className="bg-gray-900/60 border border-gray-700/50 rounded-lg px-4 py-3 space-y-1.5">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Analysis Details</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 text-xs text-gray-400">
+          <div>
+            <span className="text-gray-600">Model</span>{" "}
+            <span className="text-gray-300 font-mono">
+              {report.mode === "audio"
+                ? "voxtral-mini-latest"
+                : report.mode === "text"
+                ? "mistral-large-latest"
+                : "voxtral-mini-latest + mistral-large-latest"}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-600">Report ID</span>{" "}
+            <span className="text-gray-300 font-mono truncate" title={report.id}>
+              {report.id.slice(0, 20)}…
+            </span>
+          </div>
+          {report.analyzed_at && (
+            <div>
+              <span className="text-gray-600">Analyzed</span>{" "}
+              <span className="text-gray-300">{report.analyzed_at.replace("T", " ").replace("Z", " UTC")}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Copy / Export buttons */}
       <div className="flex justify-center gap-2 pt-2">
         <button

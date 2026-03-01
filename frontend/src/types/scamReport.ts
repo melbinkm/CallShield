@@ -27,6 +27,7 @@ export interface ScamReport {
   processing_time_ms: number;
   review_required?: boolean;
   review_reason?: string;
+  analyzed_at?: string;
 }
 
 export interface ErrorResponse {
