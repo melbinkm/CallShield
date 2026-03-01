@@ -32,7 +32,13 @@
     <img src="https://cdn.loom.com/sessions/thumbnails/45a875f7ea6b475994c19ac456c82f5c-with-play.gif" alt="CallShield — Listening for Lies (2 min demo)" width="700">
   </a>
   <br>
-  <em>▶ Click to watch: CallShield — Listening for Lies (2 min) &nbsp;|&nbsp; Live mic recording → Voxtral scores each 5s chunk → verdict builds in real time</em>
+  <em>▶ Click to watch: CallShield — Listening for Lies (2 min)</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — live verdict generation" width="700">
+  <br>
+  <em>Live mic recording → Voxtral scores each 5s chunk in real time → verdict builds as the call progresses</em>
 </p>
 
 ## The Market: $25.5B Problem — Built for Carrier-Scale Deployment
