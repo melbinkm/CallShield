@@ -28,14 +28,32 @@
 </p>
 
 <p align="center">
-  <a href="docs/screenshots/CallShield__Listening_for_Lies.mp4">
-    <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — click to watch demo video" width="700">
+  <a href="https://www.loom.com/share/45a875f7ea6b475994c19ac456c82f5c">
+    <img src="https://cdn.loom.com/sessions/thumbnails/45a875f7ea6b475994c19ac456c82f5c-with-play.gif" alt="CallShield — Listening for Lies (2 min demo)" width="700">
   </a>
   <br>
   <em>▶ Click to watch: CallShield — Listening for Lies (2 min) &nbsp;|&nbsp; Live mic recording → Voxtral scores each 5s chunk → verdict builds in real time</em>
 </p>
 
-## Judge Quickstart
+## The Market: $25.5B Problem — Built for Carrier-Scale Deployment
+
+The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. The UK's Action Fraud logged 3.2 million reports in the same year. Phone scams are the #1 vector for elder financial abuse globally — and the problem is accelerating as AI-generated voices make scam calls indistinguishable from legitimate ones.
+
+**CallShield is designed to operate at the telecom carrier layer.** Because Voxtral processes raw audio without a transcription step, the pipeline is fast enough to sit inline on a 5G network — scoring every call in real time and alerting subscribers before they comply with a demand. A carrier deployment of CallShield would mean every call on the network gets scored, not just those where a user manually uploads a recording.
+
+This is the path to protecting the **hundreds of millions of people** who receive scam calls every year but never think to check a scam-detection app.
+
+**Carrier integration roadmap:**
+
+| Phase | Capability |
+|-------|-----------|
+| Phase 1 (now) | REST + WebSocket API — carriers query per call |
+| Phase 2 | On-device Voxtral inference — no audio leaves the handset |
+| Phase 3 | Network-level inline scoring — real-time intercept on the PSTN |
+
+---
+
+## Quickstart
 
 ### Path A — No API Key (instant, zero setup)
 1. Open **[https://callshield-ui.onrender.com/](https://callshield-ui.onrender.com/)**
@@ -44,7 +62,7 @@
 
 ### Path B — Reproduce the 25/25 Evaluation (API key required)
 ```bash
-git clone https://github.com/YOUR_USERNAME/callshield.git && cd callshield
+git clone https://github.com/melbinkm/callshield.git && cd callshield
 cp backend/.env.example backend/.env   # add MISTRAL_API_KEY
 make dev                               # starts backend + frontend
 python scripts/run_evaluation.py --url http://localhost:8000
@@ -141,24 +159,6 @@ python scripts/run_evaluation.py --url https://callshield.onrender.com --output-
 Upload a phone recording, paste a transcript, or stream live audio from your microphone. CallShield uses Mistral's **Voxtral Mini** to analyze raw audio natively — reasoning about tone, urgency, vocal stress, and scripted speech patterns in a single inference pass. The result: a 0-to-1 scam score, specific warning signals, and a clear 4-tier verdict: **SAFE**, **SUSPICIOUS**, **LIKELY_SCAM**, or **SCAM**.
 
 When Voxtral's audio score exceeds 0.5, **Mistral Large automatically runs a second-opinion analysis** on the transcript summary — giving judges and users dual-model confirmation on high-risk calls.
-
----
-
-## The Market: $25.5B Problem — Built for Carrier-Scale Deployment
-
-The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. The UK's Action Fraud logged 3.2 million reports in the same year. Phone scams are the #1 vector for elder financial abuse globally — and the problem is accelerating as AI-generated voices make scam calls indistinguishable from legitimate ones.
-
-**CallShield is designed to operate at the telecom carrier layer.** Because Voxtral processes raw audio without a transcription step, the pipeline is fast enough to sit inline on a 5G network — scoring every call in real time and alerting subscribers before they comply with a demand. A carrier deployment of CallShield would mean every call on the network gets scored, not just those where a user manually uploads a recording.
-
-This is the path to protecting the **hundreds of millions of people** who receive scam calls every year but never think to check a scam-detection app.
-
-**Carrier integration roadmap:**
-
-| Phase | Capability |
-|-------|-----------|
-| Phase 1 (now) | REST + WebSocket API — carriers query per call |
-| Phase 2 | On-device Voxtral inference — no audio leaves the handset |
-| Phase 3 | Network-level inline scoring — real-time intercept on the PSTN |
 
 ---
 
@@ -465,7 +465,7 @@ See [QUICKSTART.md](docs/QUICKSTART.md) for detailed setup options (Docker, manu
 ### Docker (Recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/callshield.git
+git clone https://github.com/melbinkm/callshield.git
 cd callshield
 cp backend/.env.example backend/.env
 # Edit backend/.env — add your Mistral API key
