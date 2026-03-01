@@ -2,8 +2,13 @@
 """
 CallShield Evaluation Runner
 ============================
-Runs the full 20-scenario evaluation suite against the CallShield transcript API
+Runs the full 25-scenario evaluation suite against the CallShield transcript API
 and prints a results table + metrics that match docs/EVALUATION.md Section 9.
+
+Scenarios:
+  S01-S10  Core scam scenarios (IRS, tech support, romance, etc.)
+  L01-L10  Legitimate / safe call scenarios (3 deliberate hard cases)
+  A01-A05  Adversarial scenarios (evasive framing, polite scammers)
 
 Usage:
     python scripts/run_evaluation.py
@@ -142,6 +147,42 @@ SCENARIOS = [
      "Hey, it is Mike. Just leaving a quick message. I finished that book you lent me and it was honestly "
      "so good. Anyway, I will swing by tomorrow to drop it off if you are around. Give me a call back when "
      "you get a chance. Talk to you later."),
+
+    # ── Adversarial scenarios — evasive framing with core scam signals intact ──
+    ("A01", "Polite IRS Gift Card", "SCAM",
+     "Good morning, this is Officer Michael Barnes calling from the Internal Revenue Service. I hope "
+     "I haven't caught you at a bad time. We've discovered a discrepancy in your tax filings and I'm "
+     "reaching out as a courtesy before this escalates. To protect your record, we ask that you kindly "
+     "settle the outstanding balance of nine thousand dollars using retail gift cards within the next "
+     "45 minutes. We truly want to help you resolve this as smoothly as possible."),
+
+    ("A02", "Hedged Crypto Pitch", "LIKELY_SCAM",
+     "Hi, I'm reaching out because a mutual connection mentioned you might be interested in investment "
+     "opportunities. I want to be upfront — we cannot guarantee returns, and you should always consult "
+     "a financial advisor. That said, our AI-powered platform has shown consistent gains, and the "
+     "current entry window closes tonight at midnight. We'd need a minimum deposit of five thousand "
+     "dollars in Bitcoin to hold your spot. Think of it as a calculated risk."),
+
+    ("A03", "Certified Tech Support", "SCAM",
+     "Hello, this is David from TechShield Solutions, a certified Microsoft partner. We've detected "
+     "unusual outbound traffic from your IP address suggesting your system may be compromised. To "
+     "protect your data, I need you to allow me to connect remotely to run a diagnostic. After we "
+     "secure your machine, there's a small one-time protection fee of two hundred and forty-nine "
+     "dollars to maintain the certified monitoring service."),
+
+    ("A04", "FDIC Bank Examiner", "SCAM",
+     "This is a confidential call from the Federal Deposit Insurance Corporation. We've identified "
+     "irregular activity in accounts at your bank and are conducting an emergency audit. To prevent "
+     "your funds from being frozen during the investigation, we need you to temporarily transfer your "
+     "balance to a secure government-designated holding account. This is a standard protective measure. "
+     "Please have your account number and routing information ready."),
+
+    ("A05", "Romance to Investment", "LIKELY_SCAM",
+     "Hey sweetheart, it's been so wonderful getting to know you over these past few weeks. I feel "
+     "like we really have something special. I hate to bring this up, but I'm stranded here in Dubai "
+     "and my account has been frozen due to a banking error. If you could wire two thousand dollars "
+     "to help me get home, I swear I will pay you back the moment I land. I've never asked anyone for "
+     "anything like this. You're the only person I trust."),
 ]
 
 SCAM_VERDICTS = {"SCAM", "LIKELY_SCAM", "SUSPICIOUS"}
@@ -153,15 +194,18 @@ def is_positive(verdict: str) -> bool:
 
 
 def run(base_url: str, api_key: str, delay: float) -> List[Dict]:
-    url = f"{base_url}/api/analyze/transcript?api_key={urllib.parse.quote(api_key)}"
+    url = f"{base_url}/api/analyze/transcript"
     results = []
 
     for sid, category, expected, transcript in SCENARIOS:
         payload = json.dumps({"transcript": transcript}).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if api_key:
+            headers["X-API-Key"] = api_key
         req = urllib.request.Request(
             url,
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:

@@ -1,4 +1,4 @@
-.PHONY: dev test demo clean build setup
+.PHONY: dev test demo clean build setup eval
 
 dev:
 	docker compose up --build
@@ -12,6 +12,9 @@ test:
 
 demo:
 	./scripts/smoke_test.sh
+
+eval:
+	python scripts/run_evaluation.py --url https://callshield.onrender.com
 
 setup:
 	./scripts/setup.sh

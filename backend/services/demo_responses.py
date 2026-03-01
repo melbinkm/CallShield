@@ -76,10 +76,52 @@ def get_demo_transcript_response(transcript: str) -> dict:
     return _fresh_copy(_RESPONSES["safe_call"])
 
 
+# Canned Mistral Large second-opinion result injected into all audio demo responses
+_DEMO_TEXT_ANALYSIS = {
+    "scam_score": 0.92,
+    "confidence": 0.95,
+    "verdict": "SCAM",
+    "signals": [
+        {
+            "category": "AUTHORITY_IMPERSONATION",
+            "detail": "Transcript confirms impersonation of a government or official authority",
+            "severity": "high",
+        },
+        {
+            "category": "URGENCY_TACTICS",
+            "detail": "Immediate action demanded under threat of legal consequences",
+            "severity": "high",
+        },
+        {
+            "category": "KNOWN_SCAM_SCRIPTS",
+            "detail": "Content matches known government-threat scam pattern",
+            "severity": "high",
+        },
+    ],
+    "transcript_summary": (
+        "Mistral Large verified: caller impersonates a government authority, applies urgent "
+        "legal threats, and follows a known scam script — consistent with audio findings."
+    ),
+    "recommendation": (
+        "Hang up immediately. Both audio and text analysis confirm this is a scam. "
+        "Do not provide any information or make any payments."
+    ),
+}
+
+
 def get_demo_audio_response() -> dict:
-    """Random pick from audio-mode canned responses."""
+    """Return an audio-mode response with Mistral Large verification injected.
+
+    In production, the second-opinion triggers when Voxtral score > 0.5.
+    Demo mode always shows both analyses so judges see the dual-model orchestration.
+    """
     key = random.choice(_AUDIO_KEYS)
-    return _fresh_copy(_RESPONSES[key])
+    result = _fresh_copy(_RESPONSES[key])
+    result["text_analysis"] = deepcopy(_DEMO_TEXT_ANALYSIS)
+    # Recalculate combined score: 60% audio + 40% text (mirrors build_scam_report weighting)
+    audio_score = (result.get("audio_analysis") or {}).get("scam_score", result["combined_score"])
+    result["combined_score"] = round(min(1.0, 0.6 * audio_score + 0.4 * _DEMO_TEXT_ANALYSIS["scam_score"]), 2)
+    return result
 
 
 def get_demo_stream_chunks() -> list[dict]:

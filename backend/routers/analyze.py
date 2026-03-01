@@ -67,10 +67,20 @@ async def analyze_audio_endpoint(request: Request, file: UploadFile = File(...),
             detail={"error": "parse_error", "detail": f"Failed to parse results: {e}"},
         )
 
+    # Conditional second-opinion via Mistral Large when Voxtral score > 0.5
+    text_result = None
+    if not DEMO_MODE and audio_result.scam_score > 0.5 and audio_result.transcript_summary:
+        try:
+            raw_text = await analyze_text(audio_result.transcript_summary)
+            text_result = parse_analysis_result(raw_text)
+        except Exception as e:
+            logger.warning("Second-opinion analysis failed (non-fatal): %s", e)
+
     # Build and return report
     report = build_scam_report(
         mode="audio",
         audio_result=audio_result,
+        text_result=text_result,
         start_time=start_time,
     )
     return report
