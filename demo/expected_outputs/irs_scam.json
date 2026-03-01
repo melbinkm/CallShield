@@ -1,0 +1,41 @@
+{
+  "id": "analysis_6268e508-a8be-42e1-be0e-fc86c33bdd25",
+  "mode": "text",
+  "audio_analysis": null,
+  "text_analysis": {
+    "scam_score": 1.0,
+    "confidence": 1.0,
+    "verdict": "SCAM",
+    "signals": [
+      {
+        "category": "Impersonation of authority",
+        "detail": "Caller claims to be 'Officer Johnson from the Internal Revenue Service enforcement division' and mentions a 'federal arrest warrant'.",
+        "severity": "high"
+      },
+      {
+        "category": "Urgency or threats",
+        "detail": "Threatens arrest within 45 minutes, federal prison, and asset seizure if immediate action is not taken.",
+        "severity": "high"
+      },
+      {
+        "category": "Unusual payment methods",
+        "detail": "Requests payment via Google Play gift cards totaling $4,782.",
+        "severity": "high"
+      },
+      {
+        "category": "Pressure to keep the call secret",
+        "detail": "Instructs the recipient not to hang up or speak to anyone else about the call, calling it 'obstruction of a federal investigation'.",
+        "severity": "high"
+      },
+      {
+        "category": "Too-good-to-be-true resolution",
+        "detail": "Claims the case will be closed and warrant canceled immediately upon providing gift card codes.",
+        "severity": "medium"
+      }
+    ],
+    "transcript_summary": "The caller impersonates an IRS officer, claims the recipient owes back taxes, threatens immediate arrest, and demands payment via Google Play gift cards to resolve the issue.",
+    "recommendation": "Hang up immediately. Do not provide any personal or financial information. The IRS will never demand payment via gift cards or threaten immediate arrest. Report this call to the IRS at phishing@irs.gov and the FTC at reportfraud.ftc.gov."
+  },
+  "combined_score": 1.0,
+  "processing_time_ms": 6776.75
+}

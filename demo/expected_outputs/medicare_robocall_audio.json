@@ -1,0 +1,26 @@
+{
+  "id": "analysis_28452c7a-e80e-4d04-a6b3-2475808e745a",
+  "mode": "audio",
+  "audio_analysis": {
+    "scam_score": 0.4,
+    "confidence": 0.8,
+    "verdict": "SUSPICIOUS",
+    "signals": [
+      {
+        "category": "AUTHORITY_IMPERSONATION",
+        "detail": "Caller claims to be a Medicare healthcare advisor",
+        "severity": "medium"
+      },
+      {
+        "category": "URGENCY_TACTICS",
+        "detail": "No urgency tactics detected",
+        "severity": "low"
+      }
+    ],
+    "transcript_summary": "Caller identifies herself as Susan, a Medicare healthcare advisor, checking if the line is clear.",
+    "recommendation": "Be cautious. Medicare advisors typically contact you directly if they need to verify your information. If you are unsure, contact Medicare directly to confirm."
+  },
+  "text_analysis": null,
+  "combined_score": 0.4,
+  "processing_time_ms": 1297.81
+}

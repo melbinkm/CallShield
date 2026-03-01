@@ -1,0 +1,427 @@
+<p align="center">
+  <h1 align="center">CallShield</h1>
+  <p align="center"><strong>Real-time phone scam detection powered by Voxtral Mini's native audio intelligence</strong></p>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Built%20with-Voxtral%20Mini-orange?style=for-the-badge" alt="Built with Voxtral Mini">
+  <img src="https://img.shields.io/badge/Mistral%20Hackathon-2026-blue?style=for-the-badge" alt="Mistral Hackathon 2026">
+  <img src="https://img.shields.io/badge/Python-3.11-green?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
+  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react&logoColor=white" alt="React 19">
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
+</p>
+
+<p align="center">
+  <a href="#try-it-in-60-seconds">Live Demo</a> &nbsp;|&nbsp;
+  <a href="#">Video (90s)</a> &nbsp;|&nbsp;
+  <a href="#">Slides</a>
+</p>
+
+<p align="center">
+  <img src="docs/demo.gif" alt="CallShield Demo" width="700">
+  <br>
+  <em>See <a href="docs/DEMO_GIF_PLACEHOLDER.md">placeholder</a> — demo GIF coming soon</em>
+</p>
+
+---
+
+## Hackathon Context
+
+> **Mistral AI Worldwide Hackathon 2026**
+>
+> CallShield was built entirely via vibe CLI coding during the hackathon.
+>
+> - **Development models**: Devstral Medium, Devstral Small, Qwen 3.5 35B (local)
+> - **Product models**: Voxtral Mini + Mistral Large
+
+---
+
+## What It Does
+
+Upload a phone recording, paste a transcript, or stream live audio from your microphone. CallShield uses Mistral's **Voxtral Mini** to analyze raw audio natively — reasoning about tone, urgency, vocal stress, and scripted speech patterns in a single inference pass. The result: a 0-to-1 scam score, specific warning signals, and a clear 4-tier verdict: **SAFE**, **SUSPICIOUS**, **LIKELY_SCAM**, or **SCAM**.
+
+## The Impact
+
+The FTC reports Americans lost over **$10 billion to phone scams** in recent years, with elderly individuals disproportionately affected. Carrier-level deployment of audio-native scam detection could catch the vocal cues — aggressive tone, scripted delivery, call-center background noise — that text-only pipelines miss entirely. CallShield demonstrates this approach is viable with a single API call.
+
+---
+
+## Try It in 60 Seconds
+
+### Option A: Live Demo
+
+> Visit the live URL (coming soon) → Click **"Try Sample"** → Watch the verdict appear
+
+### Option B: Run Locally
+
+```bash
+cp backend/.env.example backend/.env
+# Edit backend/.env — add your Mistral API key
+make dev
+# Open http://localhost:5173
+```
+
+---
+
+## Why Mistral
+
+- **Voxtral Mini** (`voxtral-mini-latest`) — Streaming audio-native analysis. Detects IVR/robocall patterns, urgency in tone, and scripted speech directly from audio bytes. No transcription step needed.
+- **Mistral Large** (`mistral-large-latest`) — Deep semantic analysis of text transcripts. Structured signal extraction across 7 scam dimensions.
+- **`json_object` response format** — Guarantees structured JSON output. No parsing failures.
+- **Temperature 0.3** — Low randomness for consistent, reproducible scam scores.
+
+## Voxtral vs Traditional Pipeline
+
+| Aspect | Traditional (STT + LLM) | CallShield (Voxtral) |
+|--------|--------------------------|----------------------|
+| **API calls** | 2 (transcribe + analyze) | **1** (native audio) |
+| **Vocal cues** | Lost in transcription | **Preserved** |
+| **Robocall detection** | Text patterns only | **Audio + text signals** |
+| **Latency** | ~5-8s | **~2-4s** |
+| **Call-center noise** | Not detectable | **Detected** |
+| **TTS artifacts** | Not detectable | **Detected** |
+
+---
+
+## Architecture
+
+```
+Browser (React 19 + TypeScript)
+  ├─ Mic Recording ──→ WebSocket /ws/stream ──→ 5s WAV chunks
+  ├─ WAV Upload ─────→ POST /api/analyze/audio
+  └─ Transcript ─────→ POST /api/analyze/transcript
+                                 ↓
+                      FastAPI Backend (Python)
+                                 ↓
+                 ┌───────────────┴───────────────┐
+                 │ Voxtral Mini (audio)          │ Mistral Large (text)
+                 │ Native audio reasoning        │ Transcript analysis
+                 └───────────────┬───────────────┘
+                                 ↓
+                 Scam Score + Signals + Verdict
+                                 ↓
+                      Streamed back to UI
+```
+
+> See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture document.
+
+## Features
+
+- **3 input modes**: Microphone streaming, WAV file upload, transcript paste
+- **Real-time streaming analysis** via WebSocket with per-chunk results
+- **7 scam detection dimensions** analyzed simultaneously
+- **4-tier verdict system** with color-coded badges (SAFE / SUSPICIOUS / LIKELY_SCAM / SCAM)
+- **"Try Sample" button** for instant demo with pre-loaded scam transcripts
+- **Peak-weighted scoring** that remembers the worst moment in a call
+- **Copy results** to clipboard with one click
+- **Robocall/IVR detection** — identifies pre-recorded "press 1" messages from audio characteristics
+- **No audio storage** — all processing is in-memory only, nothing persisted
+
+---
+
+## How Scoring Works
+
+### Per-Chunk Streaming Score
+
+During live streaming, each 5-second audio chunk is scored independently by Voxtral Mini. Scores are combined using **exponential weighting**:
+
+```
+cumulative_score = 0.7 × chunk_score + 0.3 × previous_cumulative
+```
+
+Recent chunks have more influence — a scam escalation late in the call raises the score quickly.
+
+### Peak Tracking
+
+The system tracks `max_score` — the highest single-chunk score seen during the call. This prevents a scammer from "diluting" their score by adding innocent small talk.
+
+### Verdict Thresholds
+
+| Score Range | Verdict | Color |
+|-------------|---------|-------|
+| 0.00 – 0.29 | **SAFE** | Green |
+| 0.30 – 0.59 | **SUSPICIOUS** | Yellow |
+| 0.60 – 0.84 | **LIKELY_SCAM** | Orange |
+| 0.85 – 1.00 | **SCAM** | Red |
+
+## Scam Detection Dimensions
+
+CallShield evaluates every call across 7 dimensions:
+
+| # | Dimension | What It Detects |
+|---|-----------|-----------------|
+| 1 | **Urgency Tactics** | Artificial time pressure, "act now" demands |
+| 2 | **Authority Impersonation** | Claiming to be IRS, bank, police, tech support |
+| 3 | **Information Extraction** | Requests for SSN, credit card, passwords |
+| 4 | **Emotional Manipulation** | Fear, threats, guilt to pressure compliance |
+| 5 | **Vocal Patterns** | Aggressive tone, scripted speech, call-center noise |
+| 6 | **Known Scam Scripts** | IRS threats, tech support fraud, prize notification |
+| 7 | **Robocall / IVR Patterns** | Pre-recorded "press 1" messages, automated prompts |
+
+Each detected signal is tagged with a severity level: `low`, `medium`, or `high`.
+
+---
+
+## Evidence / Mini-Evaluation
+
+### Transcript Analysis (Mistral Large)
+
+| Sample | Score | Verdict | Key Signals |
+|--------|-------|---------|-------------|
+| IRS arrest threat + gift card demand | **1.0** | SCAM | Authority impersonation, urgency, unusual payment, pressure to keep secret |
+| Medicare robocall "Press 1" | **0.70** | LIKELY_SCAM | Robocall/IVR pattern, urgency, authority impersonation |
+| Friend BBQ invitation | **0.0** | SAFE | No signals detected |
+
+### Audio Analysis (Voxtral Mini — Real Robocalls)
+
+Tested against 5 real-world robocall recordings from the [FTC Robocall Audio Dataset](https://github.com/wspr-ncsu/robocall-audio-dataset):
+
+| Sample | Score | Verdict | Key Signals |
+|--------|-------|---------|-------------|
+| SSN suspension threat | **0.70** | LIKELY_SCAM | Robocall IVR, authority impersonation, urgency |
+| SSA legal threat + criminal charges | **0.85** | LIKELY_SCAM | Authority impersonation, urgency, known scam script, robocall IVR |
+| Fake Amazon suspicious charge | **0.65** | SUSPICIOUS | Authority impersonation, urgency, known scam script |
+| Vehicle warranty expiration | **0.60** | LIKELY_SCAM | Urgency, authority impersonation, known scam script |
+| Medicare health advisor | **0.40** | SUSPICIOUS | Authority impersonation |
+
+**8/8 samples correctly classified** — all scams detected, safe call confirmed safe.
+
+> 20 curated scenarios (10 scam + 10 safe), with expected verdicts, score ranges, and hard cases. See [`docs/EVALUATION.md`](docs/EVALUATION.md) for the full evaluation framework. Audio samples and results in [`demo/`](demo/).
+
+---
+
+## Prompt Engineering
+
+Our prompts use 7 techniques for accurate scam detection:
+
+1. **Anti-false-positive preamble** — Explicitly instructs the model that normal conversations should score near 0.0
+2. **7-dimension scoring framework** — Structured rubric covering urgency, authority, information extraction, emotion, vocal patterns, known scripts, and robocall/IVR
+3. **3 few-shot calibration examples**:
+   - IRS scam call → score 0.95 (establishes high-score anchor)
+   - Personal love letter → score 0.0 (establishes zero-score anchor)
+   - Medicare robocall → score 0.75 (establishes mid-range anchor)
+4. **Scoring calibration guidelines** — 5-tier rubric (0.0-0.2 normal, 0.8-1.0 clear scam)
+5. **Severity definitions** — `low` (worth noting), `medium` (concerning), `high` (strong indicator)
+6. **Structured JSON output** — `json_object` response format ensures parseable output
+7. **Temperature 0.3** — Low randomness for consistent, reproducible scores
+
+> See [`docs/MODEL_USAGE.md`](docs/MODEL_USAGE.md) for full prompt engineering details and token usage.
+
+---
+
+## Error Handling & Resilience
+
+- **WebSocket graceful close** — `intentionalCloseRef` prevents error UI on deliberate disconnection
+- **Silence detection** — Skips chunks where RMS < 500 (no wasted API calls on silence)
+- **WAV validation** — Magic byte check (`RIFF`/`WAVE` header) before processing
+- **File size limits** — 25MB for uploads, 10,000 chars for transcripts, 512KB per stream chunk
+- **JSON extraction with fallback** — Direct parse → code fence extraction → balanced brace matching
+- **Score clamping** — All scores clamped to [0.0, 1.0] regardless of model output
+- **Verdict enum validation** — Invalid verdicts default to SAFE (fail-safe)
+
+---
+
+## Abuse & Privacy
+
+CallShield stores **no audio, no transcripts, and no PII**. All processing happens in-memory and is garbage collected after each response. Logs contain only exception types — never audio content or personal information.
+
+> See [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) for the full data flow diagram, abuse scenarios, and GDPR/CCPA analysis.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 19, TypeScript 5.9, Vite 7, Tailwind CSS 4 |
+| **Backend** | FastAPI, Python 3.11, Pydantic |
+| **AI Models** | Voxtral Mini (`voxtral-mini-latest`), Mistral Large (`mistral-large-latest`) |
+| **Transport** | WebSocket (streaming), REST (upload/transcript) |
+| **Infrastructure** | Docker, nginx, Render |
+
+---
+
+## Quickstart
+
+See [QUICKSTART.md](QUICKSTART.md) for detailed setup options (Docker, manual, one-line script).
+
+### Docker (Recommended)
+
+```bash
+git clone https://github.com/YOUR_USERNAME/callshield.git
+cd callshield
+cp backend/.env.example backend/.env
+# Edit backend/.env — add your Mistral API key
+make dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+### Manual
+
+```bash
+# Backend
+cd backend
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # Edit with your API key
+uvicorn main:app --reload --port 8000
+
+# Frontend (in a new terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+See [DEPLOY.md](DEPLOY.md) for production deployment (Docker, Render, manual).
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description | Input |
+|--------|----------|-------------|-------|
+| `GET` | `/` | Root status check | — |
+| `GET` | `/api/health` | Health check + model info | — |
+| `POST` | `/api/analyze/audio` | Analyze a WAV file | `multipart/form-data` (max 25MB) |
+| `POST` | `/api/analyze/transcript` | Analyze a text transcript | `{"transcript": "..."}` (max 10,000 chars) |
+| `WS` | `/ws/stream` | Stream live audio chunks | Binary WAV chunks (max 512KB/chunk, 60 chunks) |
+
+### Response Format (ScamReport)
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-...",
+  "mode": "audio",
+  "audio_analysis": {
+    "scam_score": 0.92,
+    "confidence": 0.95,
+    "verdict": "SCAM",
+    "signals": [
+      {"category": "AUTHORITY_IMPERSONATION", "detail": "Claims to be IRS officer", "severity": "high"},
+      {"category": "URGENCY_TACTICS", "detail": "Threatens arrest within 45 minutes", "severity": "high"},
+      {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Gift card payment demand", "severity": "high"}
+    ],
+    "transcript_summary": "Caller impersonates IRS, threatens arrest, demands gift cards",
+    "recommendation": "Hang up immediately. The IRS never demands payment via gift cards."
+  },
+  "combined_score": 0.92,
+  "processing_time_ms": 3420.5
+}
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MISTRAL_API_KEY` | Yes | Your Mistral AI API key |
+| `VITE_API_URL` | No | Backend URL for frontend (default: `http://localhost:8000`) |
+
+---
+
+## Project Structure
+
+```
+callshield/
+├── backend/
+│   ├── main.py                    # FastAPI app entry point
+│   ├── config.py                  # Models, thresholds, API key
+│   ├── Dockerfile                 # Python 3.11-slim container
+│   ├── requirements.txt           # Python dependencies
+│   ├── .env.example               # API key template
+│   ├── routers/
+│   │   ├── health.py              # GET /api/health
+│   │   ├── analyze.py             # POST /api/analyze/audio & /transcript
+│   │   └── stream.py              # WS /ws/stream
+│   ├── services/
+│   │   ├── audio_analyzer.py      # Voxtral Mini audio analysis
+│   │   ├── text_analyzer.py       # Mistral Large text analysis
+│   │   ├── stream_processor.py    # Chunk scoring + aggregation
+│   │   └── response_formatter.py  # JSON parsing + verdict logic
+│   ├── models/
+│   │   └── schemas.py             # Pydantic models
+│   ├── prompts/
+│   │   └── templates.py           # Scam detection prompts
+│   └── tests/                     # 60 unit/integration tests
+│       ├── test_response_formatter.py
+│       ├── test_stream_processor.py
+│       └── test_scoring.py
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx                # Main application
+│   │   ├── api/client.ts          # API + WebSocket client
+│   │   ├── hooks/                 # useAnalyze, useStream
+│   │   └── components/            # UI components
+│   ├── Dockerfile                 # Multi-stage Node → nginx
+│   ├── nginx.conf                 # SPA routing config
+│   ├── .env.example               # API URL template
+│   └── package.json
+├── demo/
+│   ├── sample_calls/              # Sample transcripts (IRS scam, Medicare, safe)
+│   └── expected_outputs/          # Expected JSON responses
+├── docs/
+│   ├── ARCHITECTURE.md            # System architecture + data flows
+│   ├── THREAT_MODEL.md            # Privacy, abuse scenarios, GDPR
+│   ├── EVALUATION.md              # 20-scenario evaluation framework
+│   ├── MODEL_USAGE.md             # Voxtral/Mistral details, prompts, tokens
+│   └── screenshots/               # UI screenshots
+├── pitch/
+│   ├── README.md                  # Pitch materials index
+│   ├── DEMO_SCRIPT.md             # 2-minute demo walkthrough
+│   └── COMPARISON.md              # Voxtral vs traditional STT+LLM
+├── scripts/
+│   ├── setup.sh                   # Cross-platform setup (Linux/macOS)
+│   ├── setup.bat                  # Cross-platform setup (Windows)
+│   ├── run_local.sh               # Start both services locally
+│   └── smoke_test.sh              # Health + analysis smoke tests
+├── docker-compose.yml             # One-command Docker startup
+├── Makefile                       # make dev / test / setup / demo / clean
+├── render.yaml                    # Render deployment config
+├── QUICKSTART.md                  # Get running in 2 minutes
+├── DEPLOY.md                      # Production deployment guide
+├── LICENSE                        # MIT
+└── README.md                      # You are here
+```
+
+---
+
+## Future Roadmap
+
+- **Carrier API integration** — Real-time scam detection at the network level
+- **Voice cloning / deepfake detection** — Identify AI-generated voices
+- **On-device inference** — Edge deployment for privacy-first detection
+- **Multi-language support** — Extend beyond English scam patterns
+- **Browser extension** — Detect scam calls in VoIP applications
+- **PII redaction layer** — Regex-based filtering before model analysis
+
+---
+
+## Hackathon Artifacts
+
+| Artifact | Description |
+|----------|-------------|
+| [`backend/tests/`](backend/tests/) | 60 unit/integration tests (scoring, formatting, streaming) |
+| [`demo/`](demo/) | Sample transcripts and expected outputs for testing |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture, data flows, technical decisions |
+| [`docs/EVALUATION.md`](docs/EVALUATION.md) | 20-scenario evaluation framework with metrics |
+| [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | Privacy analysis, data flow, abuse mitigations |
+| [`docs/MODEL_USAGE.md`](docs/MODEL_USAGE.md) | Voxtral/Mistral usage, prompts, token estimates |
+| [`pitch/`](pitch/) | Demo script, comparison table, pitch materials |
+| [`scripts/smoke_test.sh`](scripts/smoke_test.sh) | Automated smoke tests |
+| [`QUICKSTART.md`](QUICKSTART.md) | Get running in under 2 minutes |
+| [`DEPLOY.md`](DEPLOY.md) | Production deployment guide |
+| [`Makefile`](Makefile) | One-command build, run, test |
+
+---
+
+## Credits
+
+Built for the **Mistral AI Worldwide Hackathon 2026**
+
+Powered by [Voxtral Mini](https://mistral.ai/) — Mistral's native audio understanding model
+
+## License
+
+MIT — see [LICENSE](LICENSE)

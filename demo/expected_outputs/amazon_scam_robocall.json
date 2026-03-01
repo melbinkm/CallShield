@@ -1,0 +1,31 @@
+{
+  "id": "analysis_1c4524ac-afdc-4c66-9ec9-172b3980cf8e",
+  "mode": "audio",
+  "audio_analysis": {
+    "scam_score": 0.65,
+    "confidence": 0.85,
+    "verdict": "SUSPICIOUS",
+    "signals": [
+      {
+        "category": "AUTHORITY_IMPERSONATION",
+        "detail": "Caller claims to be from Amazon Customer Service",
+        "severity": "medium"
+      },
+      {
+        "category": "URGENCY_TACTICS",
+        "detail": "Creates artificial time pressure by asking to press 1 now",
+        "severity": "medium"
+      },
+      {
+        "category": "KNOWN_SCAM_SCRIPTS",
+        "detail": "Classic customer service scam script with urgency and authority impersonation",
+        "severity": "medium"
+      }
+    ],
+    "transcript_summary": "Caller impersonates Amazon Customer Service, creates urgency to press 1, and mentions suspicious activity on the account.",
+    "recommendation": "Do not press 1. Hang up and contact Amazon directly through their official website or customer service number to verify the legitimacy of the call."
+  },
+  "text_analysis": null,
+  "combined_score": 0.65,
+  "processing_time_ms": 1723.86
+}

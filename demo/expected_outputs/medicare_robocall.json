@@ -1,0 +1,36 @@
+{
+  "id": "analysis_8e6f8e0e-da8f-495d-8c09-8a6191e70a0d",
+  "mode": "text",
+  "audio_analysis": null,
+  "text_analysis": {
+    "scam_score": 0.7,
+    "confidence": 0.9,
+    "verdict": "LIKELY_SCAM",
+    "signals": [
+      {
+        "category": "Robocall / IVR patterns",
+        "detail": "Pre-recorded message asking to 'press 1' to speak with a benefits coordinator.",
+        "severity": "high"
+      },
+      {
+        "category": "Urgency or threats",
+        "detail": "'This is a time-sensitive notification' and 'this offer is only available for a limited time.'",
+        "severity": "medium"
+      },
+      {
+        "category": "Too-good-to-be-true offers",
+        "detail": "Promises of 'additional benefits at no extra cost,' including 'new prescription drug coverage and dental and vision plans.'",
+        "severity": "medium"
+      },
+      {
+        "category": "Impersonation of authority",
+        "detail": "Claims to be an 'important message about your Medicare benefits' and mentions 'federal healthcare policy.'",
+        "severity": "high"
+      }
+    ],
+    "transcript_summary": "The call is an unsolicited, pre-recorded message claiming to be about Medicare benefits, urging the recipient to press 1 to speak with a 'licensed benefits coordinator' about time-sensitive, no-cost additional coverage. It pressures the recipient to act quickly due to a 'limited-time offer.'",
+    "recommendation": "Do not press any buttons or engage with the call. Hang up immediately. Medicare will never call you unsolicited to offer additional benefits. If you are concerned about your Medicare coverage, contact Medicare directly using the official number on their website or your Medicare card. Report this call to the Federal Trade Commission (FTC) at reportfraud.ftc.gov."
+  },
+  "combined_score": 0.7,
+  "processing_time_ms": 6800.75
+}

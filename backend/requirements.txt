@@ -5,3 +5,4 @@ mistralai
 pydantic
 python-dotenv
 websockets
+pytest

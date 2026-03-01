@@ -1,0 +1,31 @@
+{
+  "id": "analysis_65350d31-2b0f-4f61-95fb-a71dca6c4b61",
+  "mode": "audio",
+  "audio_analysis": {
+    "scam_score": 0.6,
+    "confidence": 0.8,
+    "verdict": "LIKELY_SCAM",
+    "signals": [
+      {
+        "category": "URGENCY_TACTICS",
+        "detail": "Creates artificial time pressure by mentioning 'close the file' and offering 'press 5 now' to renew warranty",
+        "severity": "medium"
+      },
+      {
+        "category": "AUTHORITY_IMPERSONATION",
+        "detail": "Calls from a 'vehicle service department' with a 'manufacturer's warranty' claim",
+        "severity": "medium"
+      },
+      {
+        "category": "KNOWN_SCAM_SCRIPTS",
+        "detail": "Common tactic of sending multiple notices and making a courtesy call to renew warranty",
+        "severity": "medium"
+      }
+    ],
+    "transcript_summary": "Caller from 'vehicle service department' mentions 'manufacturer's warranty' and creates urgency to renew before 'closing the file'.",
+    "recommendation": "Hang up. Be cautious of unsolicited calls about warranties. Legitimate warranties are typically handled directly by the manufacturer or dealership."
+  },
+  "text_analysis": null,
+  "combined_score": 0.6,
+  "processing_time_ms": 2207.51
+}

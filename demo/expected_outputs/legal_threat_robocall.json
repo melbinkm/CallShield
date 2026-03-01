@@ -1,0 +1,36 @@
+{
+  "id": "analysis_5966705d-7aaf-4e77-84f3-3f7adcc49ac4",
+  "mode": "audio",
+  "audio_analysis": {
+    "scam_score": 0.85,
+    "confidence": 0.95,
+    "verdict": "LIKELY_SCAM",
+    "signals": [
+      {
+        "category": "AUTHORITY_IMPERSONATION",
+        "detail": "Caller claims to be from the Social Security Administration",
+        "severity": "high"
+      },
+      {
+        "category": "URGENCY_TACTICS",
+        "detail": "Threatens suspension of SSN and potential criminal charges",
+        "severity": "high"
+      },
+      {
+        "category": "KNOWN_SCAM_SCRIPTS",
+        "detail": "Classic IRS/SSA scam threatening legal action and demanding immediate action",
+        "severity": "high"
+      },
+      {
+        "category": "ROBOCALL_IVR",
+        "detail": "Pre-recorded message asking recipient to press 1 to know more about the case",
+        "severity": "high"
+      }
+    ],
+    "transcript_summary": "Caller impersonates Social Security Administration, threatens suspension of SSN and potential criminal charges, and asks recipient to press 1 to know more about the case.",
+    "recommendation": "Hang up immediately. The Social Security Administration does not threaten to suspend SSNs or demand immediate action over the phone. Never press buttons on unsolicited calls."
+  },
+  "text_analysis": null,
+  "combined_score": 0.85,
+  "processing_time_ms": 2134.87
+}

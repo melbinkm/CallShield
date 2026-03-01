@@ -1,0 +1,15 @@
+{
+  "id": "analysis_203e4a60-b6ed-4abe-89a4-b9956dc610c2",
+  "mode": "text",
+  "audio_analysis": null,
+  "text_analysis": {
+    "scam_score": 0.0,
+    "confidence": 0.99,
+    "verdict": "SAFE",
+    "signals": [],
+    "transcript_summary": "A personal call from an acquaintance inviting the recipient to a casual barbecue gathering with mutual friends. The caller reminisces about shared memories and extends a friendly, low-pressure invitation.",
+    "recommendation": "This appears to be a legitimate personal call. No action is needed beyond responding to the invitation if desired."
+  },
+  "combined_score": 0.0,
+  "processing_time_ms": 2482.74
+}
