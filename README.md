@@ -293,6 +293,8 @@ Built for the **Mistral AI Worldwide Hackathon 2026**
 
 Powered by [Voxtral Mini](https://mistral.ai/) — Mistral's native audio understanding model
 
+Developed with **Mistral Vibe CLI**
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
