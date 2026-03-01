@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Props {
   onTranscriptSubmit: (text: string) => void;
@@ -25,13 +25,7 @@ Recipient: Gift cards? That sounds unusual...
 Caller: I understand your concern, but this is a secure government payment channel. If you don't comply within the hour, I cannot stop the arrest. Do not contact your bank or anyone else — this is a confidential federal matter and discussing it could result in additional charges. Can you get to a store right now?`;
 
 export default function TranscriptPaster({ onTranscriptSubmit, disabled, prefillText }: Props) {
-  const [text, setText] = useState("");
-
-  useEffect(() => {
-    if (prefillText !== undefined && prefillText !== "") {
-      setText(prefillText);
-    }
-  }, [prefillText]);
+  const [text, setText] = useState(prefillText || "");
 
   const charCount = text.length;
   const isOverLimit = charCount > 10000;

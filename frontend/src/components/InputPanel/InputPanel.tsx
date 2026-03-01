@@ -74,7 +74,7 @@ export default function InputPanel({
           />
         )}
         {activeTab === "paste" && (
-          <TranscriptPaster onTranscriptSubmit={onTranscriptSubmit} disabled={disabled} prefillText={prefillText} />
+          <TranscriptPaster key={prefillText ?? ""} onTranscriptSubmit={onTranscriptSubmit} disabled={disabled} prefillText={prefillText} />
         )}
       </div>
     </div>
