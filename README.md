@@ -4,7 +4,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/melbinkm/CallShield/tests.yml?style=for-the-badge&label=Tests" alt="Tests"></a>
   <img src="https://img.shields.io/badge/Tests-172%20passing-brightgreen?style=for-the-badge" alt="172 Tests">
   <img src="https://img.shields.io/badge/Built%20with-Voxtral%20Mini-orange?style=for-the-badge" alt="Built with Voxtral Mini">
   <img src="https://img.shields.io/badge/Mistral%20Hackathon-2026-blue?style=for-the-badge" alt="Mistral Hackathon 2026">
@@ -30,18 +29,19 @@
 <p align="center">
   <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — live verdict generation" width="700">
   <br>
-  <em>Paste a transcript → score animates in real time → SCAM verdict with signals</em>
+  <em>Live mic recording → Voxtral scores each 5s chunk in real time → verdict builds as the call progresses</em>
 </p>
 
 ---
 
 ## Hackathon Context
 
-> **Mistral AI Worldwide Hackathon 2026**
+> This app was developed as part of the **Mistral AI Worldwide Hackathon 2026**, built entirely
+> through **Mistral Vibe CLI** over the course of the event. The AI models powering the experience
+> were chosen deliberately — Devstral and Qwen 3.5 35B for development assistance, and
+> Voxtral Mini + Mistral Large as the core product intelligence.
 >
-> CallShield was built entirely via vibe CLI coding during the hackathon.
->
-> - **Development models**: Devstral Medium, Devstral Small, Qwen 3.5 35B (local)
+> - **Development models**: Devstral Medium, Devstral Small, Qwen 3.5 35B
 > - **Product models**: Voxtral Mini + Mistral Large
 
 ---
@@ -57,7 +57,7 @@ Upload a phone recording, paste a transcript, or stream live audio from your mic
 
 ## The Impact
 
-The FTC reports Americans lost over **$10 billion to phone scams** in recent years, with elderly individuals disproportionately affected. Carrier-level deployment of audio-native scam detection could catch the vocal cues — aggressive tone, scripted delivery, call-center background noise — that text-only pipelines miss entirely. CallShield demonstrates this approach is viable with a single API call.
+Phone scams cost victims worldwide **billions of dollars every year**, with elderly individuals disproportionately affected across every region. Carrier-level deployment of audio-native scam detection could catch the vocal cues — aggressive tone, scripted delivery, call-center background noise — that text-only pipelines miss entirely. CallShield demonstrates this approach is viable with a single API call.
 
 ---
 
@@ -106,7 +106,7 @@ make dev
 
 ```mermaid
 flowchart TD
-    subgraph Browser["Browser (React 19 + TypeScript)"]
+    subgraph Browser["Browser — React 19 + TS"]
         Mic[Mic Recording]
         Upload[WAV Upload]
         Transcript[Transcript Paste]
