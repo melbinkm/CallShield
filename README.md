@@ -237,6 +237,8 @@ flowchart TD
 | [SECURITY.md](SECURITY.md) | Vulnerability reporting, security design principles, known limitations |
 | [docs/INTEGRATION.md](docs/INTEGRATION.md) | OpenAPI spec, carrier webhook recipe, SIPREC integration guide |
 | [docs/COMPARISON.md](docs/COMPARISON.md) | Voxtral native audio vs STT+LLM pipeline — latency, accuracy, cost |
+| [docs/DETECTION_POLICY.md](docs/DETECTION_POLICY.md) | Versioned detection policy — thresholds, scoring algorithm, human review trigger |
+| [docs/COMPLIANCE.md](docs/COMPLIANCE.md) | GDPR Article mapping, CCPA notes, data processor relationships, deployment checklist |
 | [docs/QUICKSTART.md](docs/QUICKSTART.md) | Docker, manual setup, one-line script |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Production deployment guide |
 | [backend/tests/](backend/tests/) | 184 unit + integration tests |

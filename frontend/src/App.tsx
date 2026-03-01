@@ -8,6 +8,7 @@ import StreamingIndicator from "./components/StreamingIndicator";
 import StreamLog from "./components/StreamLog";
 import { useAnalyze } from "./hooks/useAnalyze";
 import { useStream } from "./hooks/useStream";
+import ScoreTrendChart from "./components/ScoreTrendChart";
 
 type Tab = "upload" | "record" | "paste";
 
@@ -149,6 +150,10 @@ export default function App() {
           visible={showLog}
           onToggle={() => setShowLog((v) => !v)}
         />
+
+        {partialResults.length > 1 && (
+          <ScoreTrendChart chunks={partialResults} isRecording={isRecording} />
+        )}
 
         {/* Acoustic Context — live panel during recording */}
         {isRecording && partialResults.length > 0 && (() => {
