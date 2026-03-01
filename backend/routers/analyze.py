@@ -77,7 +77,7 @@ async def analyze_audio_endpoint(request: Request, file: UploadFile = File(...),
 
 @router.post("/api/analyze/transcript", response_model=ScamReport)
 @limiter.limit("20/minute")
-async def analyze_transcript_endpoint(request: Request, body: TranscriptRequest = None, _key=Depends(require_api_key)):
+async def analyze_transcript_endpoint(request: Request, body: TranscriptRequest, _key=Depends(require_api_key)):
     start_time = time.time()
 
     transcript = body.transcript.strip()

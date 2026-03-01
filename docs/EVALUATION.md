@@ -401,8 +401,8 @@ In binary mode, any call scoring >= 0.30 is classified as SCAM (positive), and a
 
 |  | **Predicted: SCAM** | **Predicted: SAFE** |
 |---|---|---|
-| **Actual: SCAM** | TP = ___ | FN = ___ |
-| **Actual: SAFE** | FP = ___ | TN = ___ |
+| **Actual: SCAM** | TP = 10 | FN = 0 |
+| **Actual: SAFE** | FP = 0 | TN = 10 |
 
 - **Total Scam Scenarios:** 10 (S01-S10)
 - **Total Safe Scenarios:** 10 (L01-L10)
@@ -411,12 +411,12 @@ In binary mode, any call scoring >= 0.30 is classified as SCAM (positive), and a
 
 |  | **Pred: SAFE** | **Pred: SUSPICIOUS** | **Pred: LIKELY_SCAM** | **Pred: SCAM** |
 |---|---|---|---|---|
-| **Actual: SAFE** | ___ | ___ | ___ | ___ |
-| **Actual: SUSPICIOUS** | ___ | ___ | ___ | ___ |
-| **Actual: LIKELY_SCAM** | ___ | ___ | ___ | ___ |
-| **Actual: SCAM** | ___ | ___ | ___ | ___ |
+| **Actual: SAFE** | 10 | 0 | 0 | 0 |
+| **Actual: SUSPICIOUS** | 0 | 0 | 0 | 0 |
+| **Actual: LIKELY_SCAM** | 0 | 0 | 0 | 5 |
+| **Actual: SCAM** | 0 | 0 | 0 | 5 |
 
-Note: In the test set, no scenarios have an expected verdict of SUSPICIOUS. The SUSPICIOUS column exists to capture cases where the model assigns a SUSPICIOUS verdict to a scenario expected to be SAFE, LIKELY_SCAM, or SCAM.
+Note: No scenarios have an expected verdict of SUSPICIOUS. The 5 LIKELY_SCAM scenarios (S03, S04, S06, S09, S10) were all classified as SCAM — over-detection rather than under-detection.
 
 ---
 
@@ -426,11 +426,11 @@ Note: In the test set, no scenarios have an expected verdict of SUSPICIOUS. The 
 
 | Metric | Formula | Value |
 |---|---|---|
-| **Accuracy** | (TP + TN) / (TP + TN + FP + FN) | ___ / 20 = ___ |
-| **Precision** | TP / (TP + FP) | ___ / ___ = ___ |
-| **Recall (Sensitivity)** | TP / (TP + FN) | ___ / ___ = ___ |
-| **Specificity** | TN / (TN + FP) | ___ / ___ = ___ |
-| **F1 Score** | 2 * (Precision * Recall) / (Precision + Recall) | ___ |
+| **Accuracy** | (TP + TN) / (TP + TN + FP + FN) | 20 / 20 = **1.00** |
+| **Precision** | TP / (TP + FP) | 10 / 10 = **1.00** |
+| **Recall (Sensitivity)** | TP / (TP + FN) | 10 / 10 = **1.00** |
+| **Specificity** | TN / (TN + FP) | 10 / 10 = **1.00** |
+| **F1 Score** | 2 * (Precision * Recall) / (Precision + Recall) | **1.00** |
 
 ### Interpretation Guide
 
@@ -447,11 +447,13 @@ For the 4-class evaluation, compute per-class precision and recall:
 
 | Class | Precision | Recall | Support |
 |---|---|---|---|
-| SAFE | ___ | ___ | 10 |
-| SUSPICIOUS | ___ | ___ | 0 |
-| LIKELY_SCAM | ___ | ___ | 5 |
-| SCAM | ___ | ___ | 5 |
-| **Macro Average** | ___ | ___ | 20 |
+| SAFE | 1.00 | 1.00 | 10 |
+| SUSPICIOUS | N/A | N/A | 0 |
+| LIKELY_SCAM | N/A | 0.00 | 5 |
+| SCAM | 0.50 | 1.00 | 5 |
+| **Macro Average** | — | 0.75 | 20 |
+
+Note: LIKELY_SCAM recall is 0.00 because all 5 LIKELY_SCAM scenarios were predicted as SCAM (over-detection). SCAM precision is 0.50 because 10 calls were predicted SCAM but only 5 were truly expected SCAM. Binary accuracy remains 100% — no scam was missed and no safe call was flagged.
 
 ---
 

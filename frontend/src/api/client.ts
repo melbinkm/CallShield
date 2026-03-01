@@ -1,12 +1,19 @@
+import type { ScamReport } from "../types/scamReport";
+
 const API_URL = import.meta.env.VITE_API_URL ||
   `${window.location.protocol}//${window.location.hostname}:8001`;
-import type { ScamReport } from "../types/scamReport";
+const API_KEY = import.meta.env.VITE_API_KEY ?? "";
+
+function authHeaders(): Record<string, string> {
+  return { "X-API-Key": API_KEY };
+}
 
 export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<ScamReport> {
   const formData = new FormData();
   formData.append("file", file);
   const response = await fetch(`${API_URL}/api/analyze/audio`, {
     method: "POST",
+    headers: authHeaders(),
     body: formData,
     signal,
   });
@@ -24,7 +31,7 @@ export async function analyzeAudio(file: File, signal?: AbortSignal): Promise<Sc
 export async function analyzeTranscript(transcript: string, signal?: AbortSignal): Promise<ScamReport> {
   const response = await fetch(`${API_URL}/api/analyze/transcript`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ transcript }),
     signal,
   });
@@ -40,11 +47,11 @@ export async function analyzeTranscript(transcript: string, signal?: AbortSignal
 }
 
 export async function checkHealth(): Promise<{ demo_mode: boolean }> {
-  const response = await fetch(`${API_URL}/api/health`);
+  const response = await fetch(`${API_URL}/api/health`, { headers: authHeaders() });
   return response.json();
 }
 
 export function createStreamSocket(): WebSocket {
   const wsUrl = API_URL.replace(/^http/, "ws");
-  return new WebSocket(`${wsUrl}/ws/stream`);
+  return new WebSocket(`${wsUrl}/ws/stream?api_key=${encodeURIComponent(API_KEY)}`);
 }

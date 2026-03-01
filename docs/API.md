@@ -280,7 +280,7 @@ cd backend
 python scripts/generate_api_key.py --name "my-app"
 ```
 
-This creates `api_keys.json` with a hashed key. Pass the key via:
+This creates `api_keys.json` with the generated key. Pass the key via:
 - REST: `X-API-Key: cs_YOUR_KEY_HERE` header
 - WebSocket: `?api_key=cs_YOUR_KEY_HERE` query param
 

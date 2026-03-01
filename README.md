@@ -371,6 +371,7 @@ See [`docs/API.md`](docs/API.md) for the full API reference — request/response
 | Artifact | Description |
 |----------|-------------|
 | [`backend/tests/`](backend/tests/) | 172 unit/integration tests (scoring, formatting, streaming) |
+| [`scripts/run_evaluation.py`](scripts/run_evaluation.py) | Reproducible 20-scenario evaluation runner — prints full results table + metrics |
 | [`demo/`](demo/) | Sample transcripts and expected outputs for testing |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture, data flows, technical decisions |
 | [`docs/EVALUATION.md`](docs/EVALUATION.md) | 20-scenario evaluation framework with metrics |

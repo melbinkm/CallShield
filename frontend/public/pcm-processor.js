@@ -1,5 +1,6 @@
 /**
- * AudioWorklet processor for accumulating PCM samples into 5-second WAV chunks.
+ * AudioWorklet processor for accumulating PCM samples into WAV chunks.
+ * First chunk: 2s for fast initial feedback. Subsequent chunks: 5s for richer analysis.
  * Replaces the deprecated ScriptProcessorNode.
  */
 class PCMProcessor extends AudioWorkletProcessor {
@@ -7,7 +8,9 @@ class PCMProcessor extends AudioWorkletProcessor {
     super();
     this._chunks = [];
     this._sampleCount = 0;
-    this._chunkSamples = 16000 * 5; // 5 seconds at 16 kHz
+    this._chunkSamples = 16000 * 2; // First chunk: 2s for fast initial feedback
+    this._fullChunkSamples = 16000 * 5; // Subsequent chunks: 5s for richer analysis
+    this._firstChunkSent = false;
 
     // Flush remaining samples on demand (e.g. when recording stops early)
     this.port.onmessage = (e) => {
@@ -47,6 +50,11 @@ class PCMProcessor extends AudioWorkletProcessor {
         this.port.postMessage(merged, [merged.buffer]);
         this._chunks = [];
         this._sampleCount = 0;
+        // After the first quick chunk, switch to full 5s chunks
+        if (!this._firstChunkSent) {
+          this._firstChunkSent = true;
+          this._chunkSamples = this._fullChunkSamples;
+        }
       }
     }
     return true; // Keep processor alive until explicitly stopped

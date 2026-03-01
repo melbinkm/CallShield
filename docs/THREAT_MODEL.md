@@ -9,7 +9,7 @@ Real-time phone scam detection using Voxtral Mini + Mistral Large.
 CallShield is an **educational and experimental tool**. It is not intended to serve as legal, financial, or security advice.
 
 - **False positives are expected.** The system may flag legitimate calls as suspicious, or fail to flag actual scam calls. Users should never rely solely on CallShield verdicts to make decisions about personal safety, finances, or legal matters.
-- **No guarantee of accuracy.** The underlying models (Voxtral Mini for transcription, Mistral Large for analysis) are general-purpose LLMs and are not certified for fraud detection.
+- **No guarantee of accuracy.** The underlying models (Voxtral Mini for native audio analysis, Mistral Large for text analysis) are general-purpose LLMs and are not certified for fraud detection.
 - **Not a substitute for professional guidance.** If you believe you are a victim of a scam, contact your local law enforcement or financial institution directly.
 
 This tool is provided "as is" without warranty of any kind, express or implied.
@@ -44,8 +44,8 @@ This tool is provided "as is" without warranty of any kind, express or implied.
 +--------+---------+
          |
          | 3. Audio bytes forwarded to Mistral API
-         |    (Voxtral Mini: transcription)
-         |    (Mistral Large: scam analysis)
+         |    (Voxtral Mini: native audio analysis)
+         |    (Mistral Large: text transcript analysis)
          v
 +------------------+
 |   Mistral API    |
@@ -84,7 +84,7 @@ Audio data follows a strict ephemeral lifecycle:
 
 1. **Received** -- Audio chunks arrive via WebSocket frame or multipart POST body.
 2. **Held in function-local variables** -- The audio bytes are bound to local variables within request handler functions in `audio_analyzer.py` and `stream_processor.py`. They are never assigned to module-level state, global dictionaries, or persistent collections.
-3. **Forwarded** -- The bytes are sent to the Mistral API over HTTPS for transcription and analysis.
+3. **Forwarded** -- The bytes are sent to the Mistral API over HTTPS for native audio analysis.
 4. **Garbage collected** -- Once the handler function returns, the local variable references are released and Python's garbage collector reclaims the memory. There is no deferred processing or background queue.
 
 **What does NOT happen:**
@@ -107,8 +107,8 @@ Audio data follows a strict ephemeral lifecycle:
 CallShield is designed so that **verbatim transcripts are not exposed to the end user or persisted anywhere**.
 
 - The Mistral Large analysis prompt instructs the model to return a **high-level summary** of the call content (e.g., "Caller claimed to be from the IRS and demanded immediate payment via gift cards"), not a word-for-word transcript.
-- The Voxtral Mini transcription step is an intermediate internal step; its output is consumed by the analysis prompt and is not returned to the client or written to any store.
-- The JSON response to the browser contains: `scam_score` (float), `verdict` (enum), `recommendation` (string summary), and `tactics` (list of pattern labels). It does not contain a transcript field.
+- Voxtral Mini performs native audio reasoning; any internal audio summary it generates is consumed server-side and is not returned to the client or written to any store.
+- The JSON response to the browser contains: `scam_score` (float), `verdict` (enum), `recommendation` (string summary), and `signals` (list of pattern labels). It does not contain a verbatim transcript field.
 
 **Planned improvement:** A future PII regex redaction layer will scrub any inadvertent PII (phone numbers, SSNs, account numbers, names) from model output before it reaches the client. This will act as a defense-in-depth measure against prompt leakage.
 

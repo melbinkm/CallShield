@@ -80,7 +80,7 @@ This ensures the score responds quickly to new scam indicators without being thr
 
 ### When It Is Called
 
-Mistral Large is called **once per transcript** after speech-to-text conversion is complete. It analyzes the textual content of the conversation for social engineering patterns, known scam scripts, and semantic red flags that complement the audio-level analysis from Voxtral Mini.
+Mistral Large is called **once per transcript** when the user submits a text transcript via the Paste Transcript tab. It analyzes the textual content of the conversation for social engineering patterns, known scam scripts, and semantic red flags that complement the audio-level analysis from Voxtral Mini.
 
 ### API Call Pattern
 

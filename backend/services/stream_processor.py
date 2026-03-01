@@ -129,14 +129,21 @@ class StreamProcessor:
         }
 
     def get_final_result(self) -> dict:
-        """Return the final aggregated result."""
+        """Return the final aggregated result.
+
+        Uses the same peak-weighted formula as the frontend live score:
+        combined = 0.6 * max_score + 0.4 * cumulative_score
+        This ensures the final verdict is consistent with what the user saw
+        during recording.
+        """
         from services.response_formatter import score_to_verdict
-        verdict = score_to_verdict(self.cumulative_score)
+        combined_score = round(0.6 * self.max_score + 0.4 * self.cumulative_score, 4)
+        verdict = score_to_verdict(combined_score)
 
         return {
             "type": "final_result",
             "total_chunks": self.chunk_index,
-            "combined_score": round(self.cumulative_score, 4),
+            "combined_score": combined_score,
             "max_score": round(self.max_score, 4),
             "verdict": verdict,
             "signals": self.all_signals,
