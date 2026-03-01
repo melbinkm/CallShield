@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml"><img src="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/melbinkm/CallShield/tests.yml?style=for-the-badge&label=Tests" alt="Tests"></a>
   <img src="https://img.shields.io/badge/Built%20with-Voxtral%20Mini-orange?style=for-the-badge" alt="Built with Voxtral Mini">
   <img src="https://img.shields.io/badge/Mistral%20Hackathon-2026-blue?style=for-the-badge" alt="Mistral Hackathon 2026">
   <img src="https://img.shields.io/badge/Python-3.11-green?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
