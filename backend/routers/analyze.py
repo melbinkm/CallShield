@@ -1,4 +1,5 @@
 import time
+import asyncio
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 
@@ -7,9 +8,10 @@ from services.audio_analyzer import analyze_audio
 from services.text_analyzer import analyze_transcript as analyze_text
 from services.response_formatter import parse_analysis_result, build_scam_report
 from models.schemas import ScamReport, ErrorResponse, TranscriptRequest
-from config import MAX_AUDIO_SIZE_MB, MAX_TRANSCRIPT_LENGTH
+from config import MAX_AUDIO_SIZE_MB, MAX_TRANSCRIPT_LENGTH, DEMO_MODE
 from auth import require_api_key
 from rate_limit import limiter
+from services.demo_responses import get_demo_audio_response, get_demo_transcript_response
 
 router = APIRouter()
 
@@ -40,6 +42,10 @@ async def analyze_audio_endpoint(request: Request, file: UploadFile = File(...),
             status_code=400,
             detail={"error": "invalid_file_type", "detail": "File is not a valid WAV format."},
         )
+
+    if DEMO_MODE:
+        await asyncio.sleep(1.5)
+        return get_demo_audio_response()
 
     # Call Voxtral audio analysis
     try:
@@ -85,6 +91,10 @@ async def analyze_transcript_endpoint(request: Request, body: TranscriptRequest 
             status_code=400,
             detail={"error": "transcript_too_long", "detail": f"Transcript exceeds {MAX_TRANSCRIPT_LENGTH} character limit."},
         )
+
+    if DEMO_MODE:
+        await asyncio.sleep(1.0)
+        return get_demo_transcript_response(transcript)
 
     # Call Mistral text analysis
     try:

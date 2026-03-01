@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from config import DEMO_MODE
 
 router = APIRouter()
 
@@ -8,4 +9,5 @@ async def health_check():
         "status": "ok",
         "model": "voxtral-mini-latest",
         "version": "1.0.0",
+        "demo_mode": DEMO_MODE,
     }

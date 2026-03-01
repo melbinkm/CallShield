@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { checkHealth } from "./api/client";
 import InputPanel from "./components/InputPanel/InputPanel";
 import AnalysisPanel from "./components/AnalysisPanel/AnalysisPanel";
 import StreamingIndicator from "./components/StreamingIndicator";
@@ -13,6 +14,18 @@ type Tab = "upload" | "record" | "paste";
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
   const [showLog, setShowLog] = useState(false);
+  const [showDemoToast, setShowDemoToast] = useState(false);
+
+  useEffect(() => {
+    checkHealth()
+      .then((data) => {
+        if (data.demo_mode) {
+          setShowDemoToast(true);
+          setTimeout(() => setShowDemoToast(false), 8000);
+        }
+      })
+      .catch(() => {});
+  }, []);
   const { isAnalyzing, report, error, submitAudio, submitTranscript, clearResults } = useAnalyze();
   const { isRecording, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording, clearStream } = useStream();
 
@@ -55,6 +68,20 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white">
       <Header />
+
+      {showDemoToast && (
+        <div className="max-w-4xl mx-auto w-full px-4 pt-4">
+          <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/50 rounded-lg px-4 py-3 text-amber-300 text-sm">
+            <span>Mistral API key not found. Demo mode activated.</span>
+            <button
+              onClick={() => setShowDemoToast(false)}
+              className="ml-4 text-amber-400 hover:text-amber-200 font-bold text-lg leading-none"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* How It Works */}
       <section className="max-w-4xl mx-auto w-full px-4 pt-8 pb-2">

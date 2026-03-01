@@ -143,9 +143,9 @@ class TestConfigLoadsFromSecretsFile:
                 sys.modules["config"] = saved
 
 
-class TestConfigRaisesWhenNoKey:
-    def test_config_raises_when_no_key(self):
-        """When no env var and no secrets file, config raises RuntimeError."""
+class TestConfigEntersDemoWhenNoKey:
+    def test_config_enters_demo_mode_when_no_key(self):
+        """When no env var and no secrets file, config activates demo mode."""
         _mistralai = types.ModuleType("mistralai")
         _mistralai.Mistral = MagicMock()
         sys.modules["mistralai"] = _mistralai
@@ -170,9 +170,11 @@ class TestConfigRaisesWhenNoKey:
                         return real_abspath(path)
 
                     with patch("os.path.abspath", side_effect=fake_abspath):
-                        with pytest.raises(RuntimeError, match="MISTRAL_API_KEY not set"):
-                            import config
-                            importlib.reload(config)
+                        import config
+                        importlib.reload(config)
+                        assert config.DEMO_MODE is True
+                        assert config.MISTRAL_API_KEY == "demo"
+                        assert config.client is None
         finally:
             sys.modules.pop("config", None)
             if saved is not None:

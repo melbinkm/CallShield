@@ -20,6 +20,7 @@ _config.MAX_TRANSCRIPT_LENGTH = 10000
 _config.THRESHOLD_SAFE = 0.30
 _config.THRESHOLD_SUSPICIOUS = 0.60
 _config.THRESHOLD_LIKELY_SCAM = 0.85
+_config.DEMO_MODE = False
 _config.client = MagicMock()
 sys.modules["config"] = _config
 

@@ -3,6 +3,8 @@ import asyncio
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from services.stream_processor import StreamProcessor
+from services.demo_responses import get_demo_stream_chunks, get_demo_stream_final
+from config import DEMO_MODE
 from auth import verify_ws_api_key
 
 router = APIRouter()
@@ -22,6 +24,42 @@ async def stream_audio(ws: WebSocket, api_key: Optional[str] = Query(None)):
         await ws.send_json({"type": "connected"})
     except Exception:
         pass
+
+    if DEMO_MODE:
+        chunks = get_demo_stream_chunks()
+        chunk_idx = 0
+        try:
+            while True:
+                try:
+                    message = await asyncio.wait_for(ws.receive(), timeout=30.0)
+                except asyncio.TimeoutError:
+                    break
+                if "bytes" in message and chunk_idx < len(chunks):
+                    await asyncio.sleep(0.5)
+                    try:
+                        await ws.send_json(chunks[chunk_idx])
+                    except Exception:
+                        pass
+                    chunk_idx += 1
+                elif "text" in message:
+                    try:
+                        data = json.loads(message["text"])
+                    except json.JSONDecodeError:
+                        continue
+                    if data.get("type") == "end_stream":
+                        try:
+                            await ws.send_json(get_demo_stream_final())
+                        except Exception:
+                            pass
+                        break
+        except WebSocketDisconnect:
+            pass
+        finally:
+            try:
+                await ws.close()
+            except Exception:
+                pass
+        return
 
     processor = StreamProcessor()
     chunk_count = 0

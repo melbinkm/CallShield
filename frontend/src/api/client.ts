@@ -39,6 +39,11 @@ export async function analyzeTranscript(transcript: string, signal?: AbortSignal
   return response.json();
 }
 
+export async function checkHealth(): Promise<{ demo_mode: boolean }> {
+  const response = await fetch(`${API_URL}/api/health`);
+  return response.json();
+}
+
 export function createStreamSocket(): WebSocket {
   const wsUrl = API_URL.replace(/^http/, "ws");
   return new WebSocket(`${wsUrl}/ws/stream`);

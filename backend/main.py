@@ -12,7 +12,9 @@ app = FastAPI(
         "Real-time phone scam detection powered by Voxtral Mini.\n\n"
         "**Authentication:** Pass your API key via the `X-API-Key` header. "
         "Generate a key with `python scripts/generate_api_key.py --name 'my-app'`.\n\n"
-        "When no keys are configured, all endpoints are open (dev mode)."
+        "When no keys are configured, all endpoints are open (dev mode).\n\n"
+        "**Demo mode:** When no Mistral API key is configured, the API runs in demo mode "
+        "with pre-stored responses. Use `cs_demo` as your API key to test authenticated requests."
     ),
 )
 
