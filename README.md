@@ -62,6 +62,8 @@ make dev
 # Open http://localhost:5173
 ```
 
+> **No API key?** Run in [demo mode](docs/DEMO_MODE.md) — no key required, returns canned responses instantly.
+
 ---
 
 ## Why Mistral
@@ -249,7 +251,7 @@ CallShield stores **no audio, no transcripts, and no PII**. All processing happe
 
 ## Quickstart
 
-See [QUICKSTART.md](QUICKSTART.md) for detailed setup options (Docker, manual, one-line script).
+See [QUICKSTART.md](docs/QUICKSTART.md) for detailed setup options (Docker, manual, one-line script).
 
 ### Docker (Recommended)
 
@@ -281,7 +283,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
-See [DEPLOY.md](DEPLOY.md) for production deployment (Docker, Render, manual).
+See [DEPLOY.md](docs/DEPLOY.md) for production deployment (Docker, Render, manual).
 
 ---
 
@@ -289,81 +291,14 @@ See [DEPLOY.md](DEPLOY.md) for production deployment (Docker, Render, manual).
 
 | Method | Endpoint | Description | Input |
 |--------|----------|-------------|-------|
-| `GET` | `/` | Root status check | — |
 | `GET` | `/api/health` | Health check + model info | — |
 | `POST` | `/api/analyze/audio` | Analyze a WAV file | `multipart/form-data` (max 25MB) |
 | `POST` | `/api/analyze/transcript` | Analyze a text transcript | `{"transcript": "..."}` (max 10,000 chars) |
 | `WS` | `/ws/stream` | Stream live audio chunks | Binary WAV chunks (max 512KB/chunk, 60 chunks) |
 
-### Response Format (ScamReport)
+All endpoints return a `ScamReport` JSON object with `scam_score`, `verdict`, `signals`, and `recommendation`. Authentication uses `X-API-Key` header (REST) or `?api_key=` query param (WebSocket). Rate limits: 10 req/min for audio, 20 req/min for transcript.
 
-```json
-{
-  "id": "a1b2c3d4-e5f6-...",
-  "mode": "audio",
-  "audio_analysis": {
-    "scam_score": 0.92,
-    "confidence": 0.95,
-    "verdict": "SCAM",
-    "signals": [
-      {"category": "AUTHORITY_IMPERSONATION", "detail": "Claims to be IRS officer", "severity": "high"},
-      {"category": "URGENCY_TACTICS", "detail": "Threatens arrest within 45 minutes", "severity": "high"},
-      {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Gift card payment demand", "severity": "high"}
-    ],
-    "transcript_summary": "Caller impersonates IRS, threatens arrest, demands gift cards",
-    "recommendation": "Hang up immediately. The IRS never demands payment via gift cards."
-  },
-  "combined_score": 0.92,
-  "processing_time_ms": 3420.5
-}
-```
-
-## Developer API
-
-CallShield exposes a developer API with optional key-based authentication and rate limiting.
-
-### Generating an API Key
-
-```bash
-python scripts/generate_api_key.py --name "my-app"
-```
-
-When no `api_keys.json` exists, all endpoints are open (dev mode). Auth activates only after generating a key.
-
-### Example Requests
-
-**Transcript analysis:**
-```bash
-curl -X POST http://localhost:8000/api/analyze/transcript \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: cs_YOUR_KEY_HERE" \
-  -d '{"transcript": "Hello, this is the IRS. You owe $5000 in back taxes."}'
-```
-
-**Audio upload:**
-```bash
-curl -X POST http://localhost:8000/api/analyze/audio \
-  -H "X-API-Key: cs_YOUR_KEY_HERE" \
-  -F "file=@recording.wav"
-```
-
-**WebSocket streaming (wscat):**
-```bash
-wscat -c "ws://localhost:8000/ws/stream?api_key=cs_YOUR_KEY_HERE"
-```
-
-### Rate Limits
-
-| Endpoint | Limit |
-|----------|-------|
-| `POST /api/analyze/audio` | 10 requests/minute |
-| `POST /api/analyze/transcript` | 20 requests/minute |
-| `WS /ws/stream` | No rate limit |
-
-### Interactive Docs
-
-- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs) — click the **Authorize** button to set your API key
-- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+See [`docs/API.md`](docs/API.md) for the full API reference — request/response schemas, WebSocket protocol, error codes, rate limits, and API key generation.
 
 ---
 
@@ -421,11 +356,10 @@ callshield/
 │   ├── THREAT_MODEL.md            # Privacy, abuse scenarios, GDPR
 │   ├── EVALUATION.md              # 20-scenario evaluation framework
 │   ├── MODEL_USAGE.md             # Voxtral/Mistral details, prompts, tokens
+│   ├── COMPARISON.md              # Voxtral vs traditional STT+LLM
+│   ├── QUICKSTART.md              # Get running in 2 minutes
+│   ├── DEPLOY.md                  # Production deployment guide
 │   └── screenshots/               # UI screenshots
-├── pitch/
-│   ├── README.md                  # Pitch materials index
-│   ├── DEMO_SCRIPT.md             # 2-minute demo walkthrough
-│   └── COMPARISON.md              # Voxtral vs traditional STT+LLM
 ├── scripts/
 │   ├── setup.sh                   # Cross-platform setup (Linux/macOS)
 │   ├── setup.bat                  # Cross-platform setup (Windows)
@@ -434,8 +368,6 @@ callshield/
 ├── docker-compose.yml             # One-command Docker startup
 ├── Makefile                       # make dev / test / setup / demo / clean
 ├── render.yaml                    # Render deployment config
-├── QUICKSTART.md                  # Get running in 2 minutes
-├── DEPLOY.md                      # Production deployment guide
 ├── LICENSE                        # MIT
 └── README.md                      # You are here
 ```
@@ -463,10 +395,10 @@ callshield/
 | [`docs/EVALUATION.md`](docs/EVALUATION.md) | 20-scenario evaluation framework with metrics |
 | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | Privacy analysis, data flow, abuse mitigations |
 | [`docs/MODEL_USAGE.md`](docs/MODEL_USAGE.md) | Voxtral/Mistral usage, prompts, token estimates |
-| [`pitch/`](pitch/) | Demo script, comparison table, pitch materials |
+| [`docs/COMPARISON.md`](docs/COMPARISON.md) | Voxtral native audio vs traditional STT+LLM pipeline |
 | [`scripts/smoke_test.sh`](scripts/smoke_test.sh) | Automated smoke tests |
-| [`QUICKSTART.md`](QUICKSTART.md) | Get running in under 2 minutes |
-| [`DEPLOY.md`](DEPLOY.md) | Production deployment guide |
+| [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | Get running in under 2 minutes |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Production deployment guide |
 | [`Makefile`](Makefile) | One-command build, run, test |
 
 ---

@@ -71,6 +71,6 @@ The script checks dependencies, creates a virtual environment, installs packages
 
 ## Next Steps
 
-- [README.md](README.md) — full documentation, API reference, scoring details
+- [README.md](../README.md) — full documentation, API reference, scoring details
 - [DEPLOY.md](DEPLOY.md) — production deployment guide
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system architecture
+- [ARCHITECTURE.md](ARCHITECTURE.md) — system architecture

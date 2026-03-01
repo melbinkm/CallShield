@@ -110,10 +110,9 @@ curl https://your-domain.com/api/health
 Expected response:
 ```json
 {
-  "status": "healthy",
-  "models": {
-    "audio": "voxtral-mini-latest",
-    "text": "mistral-large-latest"
-  }
+  "status": "ok",
+  "model": "voxtral-mini-latest",
+  "version": "1.0.0",
+  "demo_mode": false
 }
 ```
