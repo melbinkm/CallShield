@@ -79,6 +79,20 @@ CallShield's audio-native pipeline is built for the speed requirements of live t
 
 > At 5G speeds, the bottleneck is inference latency, not bandwidth. Skipping STT cuts CallShield's critical path in half.
 
+### Cost at Scale
+
+| Call type | Models invoked | Estimated cost per call |
+|-----------|---------------|------------------------|
+| Clean call (score ≤ 0.5) | Voxtral Mini only | ~$0.002–$0.004 |
+| Scam call (score > 0.5) | Voxtral Mini + Mistral Large | ~$0.005–$0.010 |
+| Average (mixed traffic) | — | **~$0.006 per call** |
+
+At **1 million calls/day** (mid-tier carrier): ~$6,000/day. At 1 billion monthly
+minutes of US PSTN traffic, full inline scoring would cost ~$180M/year — less than
+1% of the $25.5B annual fraud loss it prevents.
+
+→ Full token breakdown: [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md)
+
 → Carrier integration recipes (Twilio, SIP SIPREC): [docs/INTEGRATION.md](docs/INTEGRATION.md)
 
 CallShield's REST + WebSocket API integrates directly with **VoIP platforms** (Twilio, Amazon Connect, Genesys) and carrier infrastructure (SIP SIPREC) — no custom audio pipeline required. → See [docs/INTEGRATION.md](docs/INTEGRATION.md) for webhook recipes and typed client examples.
@@ -154,6 +168,13 @@ Traditional scam detection transcribes first, then analyzes. CallShield skips th
 ---
 
 ## Quickstart
+
+> **Judges:** Zero-setup demo in 30 seconds — no API key, no account:
+> 1. `cp backend/.env.example backend/.env && make dev`
+> 2. Open **http://localhost:5173**
+> 3. Click any scenario card → verdict appears in ~2 seconds
+>
+> Or skip setup entirely: **[https://callshield-ui.onrender.com](https://callshield-ui.onrender.com)**
 
 ### Path A — No API Key (instant, zero setup)
 1. Open **[https://callshield-ui.onrender.com/](https://callshield-ui.onrender.com/)**

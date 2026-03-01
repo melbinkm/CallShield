@@ -55,7 +55,9 @@ export default function InputPanel({
     <div className="bg-gray-800 rounded-lg overflow-hidden">
       <TabSelector activeTab={activeTab} onTabChange={onTabChange} />
       <div className="p-6">
-        <ScenarioGallery onTranscriptSelect={onTranscriptSelect || (() => {})} />
+        {activeTab === "paste" && (
+          <ScenarioGallery onTranscriptSelect={onTranscriptSelect || (() => {})} />
+        )}
         {activeTab === "upload" && (
           <AudioUploader onFileSelect={onFileSelect} disabled={disabled} />
         )}
