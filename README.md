@@ -13,16 +13,6 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
 </p>
 
-## Every Claim is Verifiable
-
-| Claim | Evidence | How to Verify |
-|-------|----------|---------------|
-| **25/25 binary accuracy, 0 false positives** | [`docs/evaluation_results_20260301.json`](docs/evaluation_results_20260301.json) | `python scripts/run_evaluation.py` → exit 0 |
-| **172 tests passing** | [`backend/tests/`](backend/tests/) | `cd backend && python -m pytest tests/ -v` |
-| **2-3× faster than STT pipelines** | [`docs/COMPARISON.md`](docs/COMPARISON.md) | Architecture: 1 API call vs 2 (no transcription step) |
-| **No audio or transcript storage** | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | [`backend/routers/analyze.py`](backend/routers/analyze.py) — no disk writes |
-| **Dual-model verification on high-risk calls** | [`backend/routers/analyze.py:70-77`](backend/routers/analyze.py) | Upload any WAV → check `text_analysis` in JSON response |
-
 <p align="center">
   <a href="https://callshield-ui.onrender.com/">🔴 Live Demo</a>
 </p>
@@ -38,15 +28,11 @@
 </p>
 
 <p align="center">
-  <video src="docs/screenshots/CallShield__Listening_for_Lies.mp4" controls width="700"></video>
+  <a href="docs/screenshots/CallShield__Listening_for_Lies.mp4">
+    <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — click to watch demo video" width="700">
+  </a>
   <br>
-  <em>CallShield: Listening for Lies — what the industry gets wrong and how native audio intelligence fixes it</em>
-</p>
-
-<p align="center">
-  <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — live verdict generation" width="700">
-  <br>
-  <em>Live mic recording → Voxtral scores each 5s chunk in real time → verdict builds as the call progresses</em>
+  <em>▶ Click to watch: CallShield — Listening for Lies (2 min) &nbsp;|&nbsp; Live mic recording → Voxtral scores each 5s chunk → verdict builds in real time</em>
 </p>
 
 ## Judge Quickstart
@@ -401,6 +387,18 @@ make eval
 ```
 
 25/25 binary accuracy. All results independently verifiable. Checked-in evidence: [`docs/evaluation_results_20260301.json`](docs/evaluation_results_20260301.json).
+
+---
+
+## Every Claim is Verifiable
+
+| Claim | Evidence | How to Verify |
+|-------|----------|---------------|
+| **25/25 binary accuracy, 0 false positives** | [`docs/evaluation_results_20260301.json`](docs/evaluation_results_20260301.json) | `python scripts/run_evaluation.py` → exit 0 |
+| **172 tests passing** | [`backend/tests/`](backend/tests/) | `cd backend && python -m pytest tests/ -v` |
+| **2-3× faster than STT pipelines** | [`docs/COMPARISON.md`](docs/COMPARISON.md) | Architecture: 1 API call vs 2 (no transcription step) |
+| **No audio or transcript storage** | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | [`backend/routers/analyze.py`](backend/routers/analyze.py) — no disk writes |
+| **Dual-model verification on high-risk calls** | [`backend/routers/analyze.py:70-77`](backend/routers/analyze.py) | Upload any WAV → check `text_analysis` in JSON response |
 
 ---
 
