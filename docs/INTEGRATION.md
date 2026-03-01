@@ -72,26 +72,18 @@ Use this pattern to score every inbound call in a contact center platform (e.g.,
 
 ### Architecture
 
-```
-Caller ──► Contact Center Platform
-                    │
-                    │ Real-time audio stream
-                    ▼
-         ┌─────────────────────┐
-         │  Audio Splitter      │  (e.g., media gateway or SIPREC recorder)
-         │  Segment into 5s WAV │
-         └──────────┬──────────┘
-                    │ POST /analyze/audio per chunk
-                    ▼
-         ┌─────────────────────┐
-         │   CallShield API    │
-         └──────────┬──────────┘
-                    │ JSON verdict
-                    ▼
-         ┌─────────────────────┐
-         │  Webhook Handler    │  POST to your platform
-         │  Trigger alert if   │  combined_score > 0.6
-         └─────────────────────┘
+```mermaid
+flowchart TD
+    Caller["Caller"]
+    Platform["Contact Center Platform\n(Twilio / Amazon Connect / Genesys)"]
+    Splitter["Audio Splitter\nSegment into 5s WAV\n(media gateway or SIPREC recorder)"]
+    API["CallShield API"]
+    Webhook["Webhook Handler\nTrigger alert if combined_score ≥ 0.6\nPOST verdict to your platform"]
+
+    Caller -->|"inbound call"| Platform
+    Platform -->|"real-time audio stream"| Splitter
+    Splitter -->|"POST /analyze/audio per chunk"| API
+    API -->|"JSON verdict"| Webhook
 ```
 
 ### Sample Webhook Handler (Python)
@@ -144,30 +136,18 @@ SIPREC (RFC 7245) lets carriers fork a copy of the RTP stream to a recording ser
 
 ### Architecture
 
-```
-PSTN ──► SBC (Session Border Controller)
-              │
-              │ SIPREC fork (SIP INVITE + RTP)
-              ▼
-    ┌──────────────────────┐
-    │  SIPREC Recording    │
-    │  Server              │
-    │  - Receives RTP      │
-    │  - Buffers 5s PCM    │
-    │  - Encodes to WAV    │
-    └──────────┬───────────┘
-               │ WebSocket /ws/stream
-               ▼
-    ┌──────────────────────┐
-    │   CallShield API     │
-    └──────────┬───────────┘
-               │ combined_score per chunk
-               ▼
-    ┌──────────────────────┐
-    │  Alert Bus           │  (Kafka / SNS / webhook)
-    │  Push to subscriber  │
-    │  app or NOC          │
-    └──────────────────────┘
+```mermaid
+flowchart TD
+    PSTN["PSTN"]
+    SBC["SBC\n(Session Border Controller)"]
+    SIPREC["SIPREC Recording Server\nReceives RTP · buffers 5s PCM · encodes to WAV"]
+    API["CallShield API"]
+    Alert["Alert Bus\n(Kafka / SNS / webhook)\nPush to subscriber app or NOC"]
+
+    PSTN -->|"inbound call"| SBC
+    SBC -->|"SIPREC fork\nSIP INVITE + RTP"| SIPREC
+    SIPREC -->|"WebSocket /ws/stream"| API
+    API -->|"combined_score per chunk"| Alert
 ```
 
 ### Key Parameters

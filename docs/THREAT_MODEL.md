@@ -18,58 +18,19 @@ This tool is provided "as is" without warranty of any kind, express or implied.
 
 ## 2. Data Flow Diagram
 
-```
-+------------------+
-|     Browser      |
-| (React Frontend) |
-+--------+---------+
-         |
-         | 1. getUserMedia() captures mic audio
-         v
-+------------------+
-|  MediaRecorder / |
-|  AudioWorklet    |
-+--------+---------+
-         |
-         | 2. Audio chunks sent via WebSocket or POST
-         |    (binary payload, no metadata)
-         v
-+------------------+
-|     FastAPI       |
-|  (Python Server)  |
-|                   |
-|  - IN-MEMORY ONLY |
-|  - No database    |
-|  - No disk writes |
-+--------+---------+
-         |
-         | 3. Audio bytes forwarded to Mistral API
-         |    (Voxtral Mini: native audio analysis)
-         |    (Mistral Large: text transcript analysis)
-         v
-+------------------+
-|   Mistral API    |
-|  (External SaaS) |
-+--------+---------+
-         |
-         | 4. JSON response (score, verdict, summary)
-         v
-+------------------+
-|     FastAPI       |
-|  (formats resp)   |
-+--------+---------+
-         |
-         | 5. JSON response returned to client
-         v
-+------------------+
-|     Browser      |
-|  (React State)   |
-|                   |
-|  - Displayed in   |
-|    UI components  |
-|  - No persistence |
-|  - Lost on reload |
-+------------------+
+```mermaid
+flowchart TD
+    Browser["Browser\n(React Frontend)"]
+    Recorder["MediaRecorder / AudioWorklet"]
+    Server["FastAPI — Python Server\nIN-MEMORY ONLY · no database · no disk writes"]
+    Mistral["Mistral API\n(External SaaS)"]
+    State["Browser — React State\nDisplayed in UI · no persistence · lost on reload"]
+
+    Browser -->|"① getUserMedia() captures mic audio"| Recorder
+    Recorder -->|"② WebSocket / POST\nbinary payload, no metadata"| Server
+    Server -->|"③ audio bytes\nVoxtral Mini + Mistral Large"| Mistral
+    Mistral -->|"④ JSON response\nscore · verdict · summary"| Server
+    Server -->|"⑤ JSON response returned to client"| State
 ```
 
 **Key property:** Audio bytes exist only in transient function-local variables on the server. There is no persistence layer -- no database, no file system writes, no message queue, no cache.
