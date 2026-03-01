@@ -45,7 +45,10 @@ export default function TranscriptPaster({ onTranscriptSubmit, disabled }: Props
         </span>
         <div className="flex gap-2">
           <button
-            onClick={() => setText(SAMPLE_SCAM_TRANSCRIPT)}
+            onClick={() => {
+              setText(SAMPLE_SCAM_TRANSCRIPT);
+              onTranscriptSubmit(SAMPLE_SCAM_TRANSCRIPT);
+            }}
             disabled={disabled}
             className="bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >

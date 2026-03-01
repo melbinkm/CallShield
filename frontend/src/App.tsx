@@ -141,7 +141,13 @@ export default function App() {
         />
 
         {/* Final summary card after recording stops */}
-        {!isRecording && finalResult && (
+        {!isRecording && finalResult && (finalResult.total_chunks ?? 0) === 0 && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-400 text-sm">
+            No audio captured — microphone may not have been detected, or recording stopped too quickly.
+          </div>
+        )}
+
+        {!isRecording && finalResult && (finalResult.total_chunks ?? 0) > 0 && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-4">
             <h3 className="text-lg font-bold text-white text-center">Analysis Complete</h3>
             <div className="flex flex-col items-center space-y-3">

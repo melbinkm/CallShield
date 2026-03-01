@@ -80,6 +80,23 @@ Signal severity definitions:
 - "medium": Common scam pattern that warrants attention
 - "high": Strong evidence of scam intent
 
+Here are three examples to calibrate your scoring:
+
+Example 1 — SCAM (IRS arrest threat + gift card demand):
+Transcript: "This is the Internal Revenue Service. There is a warrant out for your arrest due to unpaid taxes. You must pay $2,500 immediately using iTunes gift cards or federal agents will arrive at your door within the hour."
+Response:
+{"scam_score": 0.95, "confidence": 0.95, "verdict": "SCAM", "signals": [{"category": "AUTHORITY_IMPERSONATION", "detail": "Caller claims to be the IRS", "severity": "high"}, {"category": "URGENCY_TACTICS", "detail": "Threatens arrest within the hour to force immediate action", "severity": "high"}, {"category": "UNUSUAL_PAYMENT", "detail": "Demands payment via iTunes gift cards — a classic scam payment method", "severity": "high"}, {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Classic IRS scam pattern: fake debt, arrest threat, gift card demand", "severity": "high"}], "transcript_summary": "Caller impersonates IRS, threatens arrest, demands immediate gift card payment.", "recommendation": "Hang up immediately. The IRS never calls demanding gift card payments or threatening arrest. Report to ftc.gov/complaint."}
+
+Example 2 — SAFE (personal invitation):
+Transcript: "Hey, it's Sarah! Just calling to see if you're coming to the BBQ on Saturday. We're starting around noon and I'm making my famous potato salad. Let me know if you need directions — can't wait to see you!"
+Response:
+{"scam_score": 0.0, "confidence": 0.98, "verdict": "SAFE", "signals": [], "transcript_summary": "Friend calling to invite the recipient to a Saturday BBQ.", "recommendation": "No concerns. This is a normal personal call."}
+
+Example 3 — LIKELY_SCAM (Medicare robocall):
+Transcript: "Hello, this is an important message regarding your Medicare benefits. You may qualify for additional coverage at no extra cost. Press 1 now to speak with a licensed Medicare advisor before your enrollment window closes."
+Response:
+{"scam_score": 0.75, "confidence": 0.90, "verdict": "LIKELY_SCAM", "signals": [{"category": "ROBOCALL_IVR", "detail": "Pre-recorded message instructing recipient to press a button to connect to an agent", "severity": "high"}, {"category": "URGENCY_TACTICS", "detail": "Implies an enrollment deadline to pressure immediate action", "severity": "medium"}, {"category": "KNOWN_SCAM_SCRIPTS", "detail": "Unsolicited Medicare benefits robocall — an extremely common scam pattern", "severity": "high"}], "transcript_summary": "Automated robocall about Medicare benefits urging press 1 to speak with a representative.", "recommendation": "Hang up. Legitimate Medicare communications arrive by mail. Never press buttons on unsolicited robocalls."}
+
 Respond in this exact JSON format:
 {
   "scam_score": <float 0.0 to 1.0>,

@@ -99,15 +99,11 @@ export function useStream() {
       const ws = createStreamSocket();
       wsRef.current = ws;
 
-      ws.onopen = () => {
+      ws.onopen = async () => {
         setIsRecording(true);
 
         const audioCtx = new AudioContext({ sampleRate: 16000 });
         const source = audioCtx.createMediaStreamSource(stream);
-        const processor = audioCtx.createScriptProcessor(4096, 1, 1);
-        let pcmBuffer: Float32Array[] = [];
-        let sampleCount = 0;
-        const CHUNK_SAMPLES = 16000 * 5; // 5 seconds
 
         // Audio level visualization via AnalyserNode
         const analyser = audioCtx.createAnalyser();
@@ -123,39 +119,29 @@ export function useStream() {
           for (let i = 0; i < dataArray.length; i++) {
             sum += dataArray[i];
           }
-          const avg = sum / dataArray.length;
-          setAudioLevel(avg / 255); // Normalize to 0-1
+          setAudioLevel(sum / dataArray.length / 255);
           animFrameRef.current = requestAnimationFrame(updateLevel);
         };
         animFrameRef.current = requestAnimationFrame(updateLevel);
 
-        processor.onaudioprocess = (e) => {
-          const pcm = new Float32Array(e.inputBuffer.getChannelData(0));
-          pcmBuffer.push(pcm);
-          sampleCount += pcm.length;
+        // AudioWorkletNode replaces the deprecated ScriptProcessorNode
+        await audioCtx.audioWorklet.addModule("/pcm-processor.js");
+        const worklet = new AudioWorkletNode(audioCtx, "pcm-processor");
 
-          if (sampleCount >= CHUNK_SAMPLES) {
-            // Merge buffers
-            const merged = new Float32Array(sampleCount);
-            let offset = 0;
-            for (const buf of pcmBuffer) {
-              merged.set(buf, offset);
-              offset += buf.length;
-            }
-            const wavBytes = encodeWAV(merged, 16000);
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(wavBytes);
-            }
-            pcmBuffer = [];
-            sampleCount = 0;
+        worklet.port.onmessage = (e: MessageEvent<Float32Array>) => {
+          const wavBytes = encodeWAV(e.data, 16000);
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(wavBytes);
           }
         };
 
+        // Silent sink — gain=0 prevents echo; destination connection keeps worklet active
         const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 0; // Zero volume to prevent echo
+        gainNode.gain.value = 0;
+        gainNode.connect(audioCtx.destination);
 
-        source.connect(processor);
-        processor.connect(gainNode);
+        source.connect(worklet);
+        worklet.connect(gainNode);
         audioCtxRef.current = audioCtx;
       };
 
