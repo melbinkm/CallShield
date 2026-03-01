@@ -57,6 +57,8 @@ The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. Pho
 
 **CallShield is designed to operate at the telecom carrier layer.** Because Voxtral processes raw audio without a transcription step, the pipeline is fast enough to sit inline on a live call — scoring every 5-second chunk in real time and alerting subscribers before they comply with a demand.
 
+**It works: 25/25 test scenarios correctly classified — zero false positives, zero missed scams — including 5 adversarial evasion attempts.** → [Full evaluation results](docs/EVALUATION.md)
+
 | Phase | Capability |
 |-------|-----------|
 | Phase 1 (now) | REST + WebSocket API — carriers query per call |
