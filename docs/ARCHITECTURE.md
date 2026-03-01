@@ -8,53 +8,41 @@ CallShield is a real-time phone scam detection system that uses Mistral's Voxtra
 
 ## Component Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Browser (React 19 + TypeScript)             │
-│                                                                 │
-│  ┌──────────┐   ┌──────────────┐   ┌────────────────────────┐  │
-│  │ WAV      │   │ Transcript   │   │ Microphone Recording   │  │
-│  │ Upload   │   │ Paste        │   │ (MediaRecorder → WAV)  │  │
-│  └────┬─────┘   └──────┬───────┘   └───────────┬────────────┘  │
-│       │                │                        │               │
-└───────┼────────────────┼────────────────────────┼───────────────┘
-        │                │                        │
-   POST /api/       POST /api/             WS /ws/stream
-   analyze/audio    analyze/transcript     (binary WAV chunks)
-        │                │                        │
-┌───────┴────────────────┴────────────────────────┴───────────────┐
-│                   FastAPI Backend (Python 3.11)                  │
-│                                                                 │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
-│  │ routers/    │  │ routers/     │  │ routers/stream.py      │ │
-│  │ analyze.py  │  │ analyze.py   │  │ StreamProcessor        │ │
-│  │ (audio)     │  │ (transcript) │  │ (per-chunk scoring)    │ │
-│  └──────┬──────┘  └──────┬───────┘  └───────────┬────────────┘ │
-│         │                │                       │              │
-│  ┌──────┴──────┐  ┌──────┴───────┐  ┌───────────┴────────────┐ │
-│  │ audio_      │  │ text_        │  │ stream_processor.py    │ │
-│  │ analyzer.py │  │ analyzer.py  │  │ is_silent() filter     │ │
-│  │ Voxtral API │  │ Mistral API  │  │ Voxtral API per-chunk  │ │
-│  └──────┬──────┘  └──────┬───────┘  └───────────┬────────────┘ │
-│         │                │                       │              │
-│         └────────────────┴───────────────────────┘              │
-│                          │                                      │
-│              ┌───────────┴───────────┐                          │
-│              │ response_formatter.py │                          │
-│              │ • extract_json()      │                          │
-│              │ • parse_analysis()    │                          │
-│              │ • score_to_verdict()  │                          │
-│              │ • build_scam_report() │                          │
-│              └───────────┬───────────┘                          │
-│                          │                                      │
-│              ┌───────────┴───────────┐                          │
-│              │ models/schemas.py     │                          │
-│              │ ScamReport (Pydantic) │                          │
-│              └───────────────────────┘                          │
-└─────────────────────────────────────────────────────────────────┘
-        │                │                        │
-   JSON response    JSON response         WebSocket frames
-   (ScamReport)     (ScamReport)      (partial → final result)
+```mermaid
+flowchart TD
+    subgraph Browser["Browser (React 19 + TypeScript)"]
+        Upload[WAV Upload]
+        Paste[Transcript Paste]
+        Mic["Microphone Recording<br/>(MediaRecorder → WAV)"]
+    end
+
+    Upload -->|"POST /api/analyze/audio"| RA_Audio
+    Paste -->|"POST /api/analyze/transcript"| RA_Text
+    Mic -->|"WS /ws/stream<br/>(binary WAV chunks)"| RS
+
+    subgraph Backend["FastAPI Backend (Python 3.11)"]
+        RA_Audio["routers/analyze.py<br/>(audio)"]
+        RA_Text["routers/analyze.py<br/>(transcript)"]
+        RS["routers/stream.py<br/>StreamProcessor<br/>(per-chunk scoring)"]
+
+        AA["audio_analyzer.py<br/>Voxtral API"]
+        TA["text_analyzer.py<br/>Mistral API"]
+        SP["stream_processor.py<br/>is_silent() filter<br/>Voxtral API per-chunk"]
+
+        RA_Audio --> AA
+        RA_Text --> TA
+        RS --> SP
+
+        AA --> RF
+        TA --> RF
+        SP --> RF
+
+        RF["response_formatter.py<br/>extract_json()<br/>parse_analysis()<br/>score_to_verdict()<br/>build_scam_report()"]
+        RF --> Schemas["models/schemas.py<br/>ScamReport (Pydantic)"]
+    end
+
+    Schemas -->|"JSON response<br/>(ScamReport)"| Browser
+    SP -->|"WebSocket frames<br/>(partial → final result)"| Browser
 ```
 
 ---

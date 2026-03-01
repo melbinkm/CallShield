@@ -4,16 +4,20 @@
 
 ### Traditional Approach: Speech-to-Text + LLM
 
-```
-Audio → STT Service (Whisper/Deepgram) → Text Transcript → LLM Analysis → Result
-         API Call #1                       API Call #2
+```mermaid
+flowchart LR
+    Audio[Audio] -->|"API Call #1"| STT["STT Service<br/>(Whisper/Deepgram)"]
+    STT --> Transcript[Text Transcript]
+    Transcript -->|"API Call #2"| LLM[LLM Analysis]
+    LLM --> Result[Result]
 ```
 
 ### CallShield Approach: Voxtral Native Audio
 
-```
-Audio → Voxtral Mini (native audio reasoning) → Result
-         API Call #1 (only)
+```mermaid
+flowchart LR
+    Audio[Audio] -->|"API Call #1 (only)"| Voxtral["Voxtral Mini<br/>(native audio reasoning)"]
+    Voxtral --> Result[Result]
 ```
 
 ---

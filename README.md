@@ -4,6 +4,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml"><img src="https://github.com/melbinkm/CallShield/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
   <img src="https://img.shields.io/badge/Built%20with-Voxtral%20Mini-orange?style=for-the-badge" alt="Built with Voxtral Mini">
   <img src="https://img.shields.io/badge/Mistral%20Hackathon-2026-blue?style=for-the-badge" alt="Mistral Hackathon 2026">
   <img src="https://img.shields.io/badge/Python-3.11-green?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
@@ -85,22 +86,27 @@ make dev
 
 ## Architecture
 
-```
-Browser (React 19 + TypeScript)
-  ├─ Mic Recording ──→ WebSocket /ws/stream ──→ 5s WAV chunks
-  ├─ WAV Upload ─────→ POST /api/analyze/audio
-  └─ Transcript ─────→ POST /api/analyze/transcript
-                                 ↓
-                      FastAPI Backend (Python)
-                                 ↓
-                 ┌───────────────┴───────────────┐
-                 │ Voxtral Mini (audio)          │ Mistral Large (text)
-                 │ Native audio reasoning        │ Transcript analysis
-                 └───────────────┬───────────────┘
-                                 ↓
-                 Scam Score + Signals + Verdict
-                                 ↓
-                      Streamed back to UI
+```mermaid
+flowchart TD
+    subgraph Browser["Browser (React 19 + TypeScript)"]
+        Mic[Mic Recording]
+        Upload[WAV Upload]
+        Transcript[Transcript Paste]
+    end
+
+    Mic -->|"WebSocket /ws/stream<br/>5s WAV chunks"| Backend
+    Upload -->|"POST /api/analyze/audio"| Backend
+    Transcript -->|"POST /api/analyze/transcript"| Backend
+
+    subgraph Backend["FastAPI Backend (Python)"]
+        direction TB
+        Voxtral["Voxtral Mini<br/>Native audio reasoning"]
+        MistralLarge["Mistral Large<br/>Transcript analysis"]
+    end
+
+    Voxtral --> Result["Scam Score + Signals + Verdict"]
+    MistralLarge --> Result
+    Result -->|"Streamed back to UI"| Browser
 ```
 
 > See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture document.
