@@ -9,6 +9,9 @@ interface PartialResult {
   signals?: Signal[];
   recommendation?: string;
   transcript_summary?: string;
+  timestamp_ms?: number;
+  score_delta?: number;
+  new_signals?: Signal[];
 }
 
 interface Props {
@@ -42,6 +45,9 @@ seconds)...</p>
             <div key={i} className="border-b border-gray-800 pb-3 mb-3 last:border-0">
               <div className="flex justify-between items-center mb-1">
                 <span className="text-gray-400 text-xs">Chunk #{r.chunk_index}</span>
+                {r.timestamp_ms !== undefined && (
+                  <span className="text-gray-500 text-xs">{(r.timestamp_ms / 1000).toFixed(1)}s</span>
+                )}
                 <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                   r.verdict === "SAFE" ? "bg-green-900 text-green-300" :
                   r.verdict === "SUSPICIOUS" ? "bg-yellow-900 text-yellow-300" :
@@ -51,11 +57,16 @@ seconds)...</p>
                   {r.verdict}
                 </span>
               </div>
-              <div className="flex gap-4 text-sm mb-2">
+              <div className="flex gap-4 text-sm mb-2 items-center">
                 <span className="text-gray-300">Score: <b>{Math.round((r.scam_score ?? 0) *
   100)}%</b></span>
                 <span className="text-gray-300">Cumulative: <b>{Math.round((r.cumulative_score ?? 0)
   * 100)}%</b></span>
+                {r.score_delta !== undefined && Math.abs(r.score_delta) > 0.05 && (
+                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${r.score_delta > 0 ? "bg-red-900/50 text-red-300" : "bg-green-900/50 text-green-300"}`}>
+                    {r.score_delta > 0 ? `\u25B2 +${Math.round(r.score_delta * 100)}%` : `\u25BC ${Math.round(r.score_delta * 100)}%`}
+                  </span>
+                )}
               </div>
               {r.transcript_summary && (
                 <p className="text-xs text-gray-300 bg-gray-800 rounded px-2 py-1 mb-2 italic">
@@ -64,16 +75,20 @@ seconds)...</p>
               )}
               {r.signals && r.signals.length > 0 && (
                 <ul className="space-y-1">
-                  {r.signals.map((s, j) => (
-                    <li key={j} className="text-xs text-gray-400">
-                      <span className={`font-semibold ${
-                        s.severity === "high" ? "text-red-400" :
-                        s.severity === "medium" ? "text-yellow-400" :
-                        "text-gray-300"
-                      }`}>[{s.category}]</span>{" "}
-                      {s.detail}
-                    </li>
-                  ))}
+                  {r.signals.map((s, j) => {
+                    const isNew = r.new_signals?.some(ns => ns.category === s.category);
+                    return (
+                      <li key={j} className="text-xs text-gray-400 flex items-center gap-1">
+                        <span className={`font-semibold ${
+                          s.severity === "high" ? "text-red-400" :
+                          s.severity === "medium" ? "text-yellow-400" :
+                          "text-gray-300"
+                        }`}>[{s.category}]</span>
+                        {isNew && <span className="bg-blue-700 text-blue-200 text-xs px-1 rounded font-bold">NEW</span>}
+                        {" "}{s.detail}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               {r.recommendation && (

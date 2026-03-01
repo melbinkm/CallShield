@@ -13,6 +13,19 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
 </p>
 
+## Claim-Proof Scoreboard
+
+| Claim | Evidence | Artifact | How to reproduce |
+|-------|----------|----------|-----------------|
+| 25/25 detection accuracy | 100% on curated eval set (20 scam + 5 edge cases) | [docs/EVALUATION.md](docs/EVALUATION.md) | `python scripts/run_evaluation.py --url http://localhost:8000` |
+| Zero false positives | 0/10 safe calls misclassified | [docs/EVALUATION.md](docs/EVALUATION.md) | Run evaluation script, inspect L01–L10 rows |
+| 172 automated tests | Full unit + integration suite | [backend/tests/](backend/tests/) | `cd backend && pytest --tb=short -q` |
+| Audio-native advantage | Voxtral processes raw WAV — no transcription step | [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md) | Upload WAV; compare audio vs text scores in report |
+| Privacy-first design | Zero audio storage; in-memory only | [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Review Sections 3–5 of threat model |
+| Production latency | < 3s per 5s audio chunk | [docs/EVALUATION.md](docs/EVALUATION.md) | Record 10s live; watch chunk timestamps in log |
+
+---
+
 <p align="center">
   <a href="https://callshield-ui.onrender.com/">🔴 Live Demo</a>
 </p>

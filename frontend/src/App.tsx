@@ -15,6 +15,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
   const [showLog, setShowLog] = useState(false);
   const [showDemoToast, setShowDemoToast] = useState(false);
+  const [prefillText, setPrefillText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     checkHealth()
@@ -35,6 +36,11 @@ export default function App() {
     clearResults();
     clearStream();
     setShowLog(false);
+  };
+
+  const handleTranscriptSelect = (text: string) => {
+    setActiveTab("paste");
+    setPrefillText(text);
   };
 
   // Compute deterministic values from partial results
@@ -121,6 +127,8 @@ export default function App() {
           hasResults={partialResults.length > 0}
           latestChunk={partialResults[partialResults.length - 1]}
           chunks={partialResults}
+          onTranscriptSelect={handleTranscriptSelect}
+          prefillText={prefillText}
         />
 
         {error && (
@@ -176,6 +184,11 @@ export default function App() {
               }`}>
                 {finalResult.verdict?.replace("_", " ")}
               </span>
+              {finalResult.review_required && (
+                <div className="flex items-center gap-2 bg-yellow-900/40 border border-yellow-600/50 rounded px-3 py-1.5 text-yellow-300 text-xs font-medium">
+                  {"\u26A0"} Needs Human Review — {finalResult.review_reason}
+                </div>
+              )}
               <p className="text-gray-400 text-xs">
                 {finalResult.total_chunks} chunk{finalResult.total_chunks !== 1 ? "s" : ""} analyzed
                 {finalResult.max_score !== undefined && ` | Peak: ${Math.round(finalResult.max_score * 100)}%`}

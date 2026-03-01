@@ -168,4 +168,21 @@ Although CallShield itself does not persist data, the act of capturing microphon
 
 ---
 
+## 8. Adversarial Robustness Test Results
+
+The following adversarial test cases are implemented in `backend/tests/test_adversarial.py` and run as part of the automated test suite.
+
+| Test Case | Input | Expected Behavior | Status |
+|-----------|-------|-------------------|--------|
+| **Prompt injection** | Instruction string embedded in `recommendation` or `detail` fields | Score clamped, valid result returned, no crash | PASS |
+| **Borderline benign IVR** | Pharmacy pickup reminder transcript | Verdict ≠ SCAM | PASS |
+| **Short/noisy content** | < 10-word transcript, minimal JSON | No crash; defaults applied; confidence field present | PASS |
+| **Long-con script** | Friendly opener → wire-transfer demand | `scam_score` ≥ 0.6 | PASS |
+| **Silence detection** | Zero-byte PCM buffer (44-byte header + zeros) | `is_silent()` returns `True` | PASS |
+| **Score clamping** | Model returns `scam_score: 1.5` or `scam_score: -0.5` | Clamped to `[0.0, 1.0]` | PASS |
+
+Run the suite: `cd backend && pytest tests/test_adversarial.py -v`
+
+---
+
 *Last updated: 2026-02-28*

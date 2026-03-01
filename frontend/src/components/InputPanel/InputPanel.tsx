@@ -2,6 +2,7 @@ import TabSelector from "./TabSelector";
 import AudioUploader from "./AudioUploader";
 import TranscriptPaster from "./TranscriptPaster";
 import MicRecorder from "./MicRecorder";
+import ScenarioGallery from "./ScenarioGallery";
 
 type Tab = "upload" | "record" | "paste";
 
@@ -27,6 +28,8 @@ interface Props {
   hasResults?: boolean;
   latestChunk?: ChunkData;
   chunks?: ChunkData[];
+  onTranscriptSelect?: (text: string) => void;
+  prefillText?: string;
 }
 
 export default function InputPanel({
@@ -45,11 +48,14 @@ export default function InputPanel({
   hasResults,
   latestChunk,
   chunks,
+  onTranscriptSelect,
+  prefillText,
 }: Props) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
       <TabSelector activeTab={activeTab} onTabChange={onTabChange} />
       <div className="p-6">
+        <ScenarioGallery onTranscriptSelect={onTranscriptSelect || (() => {})} />
         {activeTab === "upload" && (
           <AudioUploader onFileSelect={onFileSelect} disabled={disabled} />
         )}
@@ -68,7 +74,7 @@ export default function InputPanel({
           />
         )}
         {activeTab === "paste" && (
-          <TranscriptPaster onTranscriptSubmit={onTranscriptSubmit} disabled={disabled} />
+          <TranscriptPaster onTranscriptSubmit={onTranscriptSubmit} disabled={disabled} prefillText={prefillText} />
         )}
       </div>
     </div>

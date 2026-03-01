@@ -114,6 +114,17 @@ def build_scam_report(
     else:
         raise ValueError("At least one analysis result is required")
 
+    in_band = 0.35 <= combined <= 0.65
+    disagree = (audio_result is not None and text_result is not None and
+                abs(audio_result.scam_score - text_result.scam_score) > 0.3)
+    low_conf = (audio_result is not None and audio_result.confidence < 0.55)
+    review_required = in_band or disagree or low_conf
+    review_reason = (
+        "Score in ambiguous range — human judgement recommended" if in_band else
+        "Audio and text analyses disagree significantly" if disagree else
+        "Low model confidence" if low_conf else None
+    )
+
     elapsed_ms = (time.time() - start_time) * 1000
 
     return ScamReport(
@@ -123,4 +134,6 @@ def build_scam_report(
         text_analysis=text_result,
         combined_score=round(combined, 4),
         processing_time_ms=round(elapsed_ms, 2),
+        review_required=review_required,
+        review_reason=review_reason,
     )

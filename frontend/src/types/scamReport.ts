@@ -14,6 +14,8 @@ export interface AnalysisResult {
   signals: Signal[];
   transcript_summary?: string;
   recommendation: string;
+  review_required?: boolean;
+  review_reason?: string;
 }
 
 export interface ScamReport {
@@ -23,6 +25,8 @@ export interface ScamReport {
   text_analysis: AnalysisResult | null;
   combined_score: number;
   processing_time_ms: number;
+  review_required?: boolean;
+  review_reason?: string;
 }
 
 export interface ErrorResponse {

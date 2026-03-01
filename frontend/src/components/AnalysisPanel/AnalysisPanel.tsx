@@ -67,6 +67,16 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
     }
   };
 
+  const handleExportJSON = () => {
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "callshield-report.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg p-6 space-y-6">
       {/* Score and verdict row */}
@@ -76,6 +86,11 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
         </div>
         <div className="text-center space-y-2">
           <VerdictBadge verdict={analysis.verdict} />
+          {report.review_required && (
+            <div className="flex items-center gap-2 bg-yellow-900/40 border border-yellow-600/50 rounded px-3 py-1.5 text-yellow-300 text-xs font-medium">
+              {"\u26A0"} Needs Human Review — {report.review_reason}
+            </div>
+          )}
           <p className="text-gray-500 text-xs">
             Confidence: {Math.round(analysis.confidence * 100)}%
           </p>
@@ -101,13 +116,56 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
       {/* Recommendation */}
       <RecommendationBox recommendation={analysis.recommendation} />
 
-      {/* Copy Results button */}
-      <div className="flex justify-center pt-2">
+      {/* Side-by-side comparison panel */}
+      {report.audio_analysis && report.text_analysis && (
+        <div className="bg-gray-700/50 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-3">
+            Why Audio-Native Wins
+          </h3>
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Voxtral (audio-native)</p>
+              <p className={`text-2xl font-bold ${report.audio_analysis.scam_score >= 0.6 ? "text-red-400" : report.audio_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
+                {Math.round(report.audio_analysis.scam_score * 100)}%
+              </p>
+              <p className="text-xs text-gray-400 mt-1">{report.audio_analysis.verdict.replace("_", " ")}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Text-only</p>
+              <p className={`text-2xl font-bold ${report.text_analysis.scam_score >= 0.6 ? "text-red-400" : report.text_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
+                {Math.round(report.text_analysis.scam_score * 100)}%
+              </p>
+              <p className="text-xs text-gray-400 mt-1">{report.text_analysis.verdict.replace("_", " ")}</p>
+            </div>
+          </div>
+          {(() => {
+            const delta = Math.round((report.audio_analysis.scam_score - report.text_analysis.scam_score) * 100);
+            if (Math.abs(delta) < 1) return null;
+            return (
+              <p className={`text-xs text-center mt-3 font-medium ${delta > 0 ? "text-red-400" : "text-green-400"}`}>
+                Delta: {delta > 0 ? `+${delta}pp` : `${delta}pp`} {"\u2190"} audio {delta > 0 ? "detected more risk" : "found less risk"} than text
+              </p>
+            );
+          })()}
+          <p className="text-xs text-gray-500 text-center mt-2 italic">
+            Audio-native analysis catches paralinguistic cues text alone misses.
+          </p>
+        </div>
+      )}
+
+      {/* Copy / Export buttons */}
+      <div className="flex justify-center gap-2 pt-2">
         <button
           onClick={handleCopy}
           className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
         >
           {copied ? "Copied!" : "Copy Results"}
+        </button>
+        <button
+          onClick={handleExportJSON}
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+        >
+          Export JSON
         </button>
       </div>
     </div>

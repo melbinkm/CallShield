@@ -3,6 +3,7 @@ import json
 import asyncio
 import functools
 import struct
+import time
 import urllib.request
 from config import MISTRAL_API_KEY, AUDIO_MODEL
 from prompts.templates import SCAM_AUDIO_PROMPT
@@ -34,16 +35,24 @@ class StreamProcessor:
         self.all_signals = []
         self.last_recommendation = ""
         self.last_transcript_summary = ""
+        self.start_time = time.time()
+        self.seen_signal_categories: set = set()
+        self.prev_cumulative = 0.0
 
     async def process_chunk(self, audio_chunk: bytes) -> dict:
         """Process a single audio chunk and return partial result."""
         # Always increment chunk_index to avoid duplicates
         self.chunk_index += 1
         
+        timestamp_ms = int((time.time() - self.start_time) * 1000)
+
         if is_silent(audio_chunk):
             return {
                 "type": "partial_result",
                 "chunk_index": self.chunk_index,
+                "timestamp_ms": timestamp_ms,
+                "score_delta": 0.0,
+                "new_signals": [],
                 "scam_score": 0.0,
                 "cumulative_score": round(self.cumulative_score, 4),
                 "verdict": "SAFE",
@@ -108,17 +117,28 @@ class StreamProcessor:
         self.last_recommendation = data.get("recommendation", "")
         self.last_transcript_summary = data.get("transcript_summary", "")
 
+        # Compute score_delta before updating cumulative
+        score_delta = chunk_score - self.prev_cumulative
+
+        # Compute new_signals (categories not seen before)
+        new_signals = [s for s in signals if s.get("category") not in self.seen_signal_categories]
+        self.seen_signal_categories.update(s.get("category") for s in signals)
+
         # Update peak score
         if chunk_score > self.max_score:
             self.max_score = chunk_score
 
         # Exponential weighting: recent/severe chunks weighted more
         self.cumulative_score = 0.7 * chunk_score + 0.3 * self.cumulative_score
+        self.prev_cumulative = self.cumulative_score
         self.all_signals.extend(signals)
 
         return {
             "type": "partial_result",
             "chunk_index": self.chunk_index,
+            "timestamp_ms": timestamp_ms,
+            "score_delta": round(score_delta, 4),
+            "new_signals": new_signals,
             "scam_score": round(chunk_score, 4),
             "cumulative_score": round(self.cumulative_score, 4),
             "max_score": round(self.max_score, 4),
@@ -141,6 +161,14 @@ class StreamProcessor:
         combined_score = round(0.6 * self.max_score + 0.4 * self.cumulative_score, 4)
         verdict = score_to_verdict(combined_score)
 
+        in_band = 0.35 <= combined_score <= 0.65
+        low_conf = self.cumulative_score < 0.55 and self.max_score < 0.55  # rough proxy
+        review_required = in_band or low_conf
+        review_reason = (
+            "Score in ambiguous range — human judgement recommended" if in_band else
+            "Low model confidence" if low_conf else None
+        )
+
         return {
             "type": "final_result",
             "total_chunks": self.chunk_index,
@@ -150,4 +178,7 @@ class StreamProcessor:
             "signals": self.all_signals,
             "recommendation": self.last_recommendation,
             "transcript_summary": self.last_transcript_summary,
+            "review_required": review_required,
+            "review_reason": review_reason,
+            "text_score": None,
         }

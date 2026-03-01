@@ -12,6 +12,9 @@ interface PartialResult {
   signals?: Signal[];
   recommendation?: string;
   transcript_summary?: string;
+  timestamp_ms?: number;
+  score_delta?: number;
+  new_signals?: Signal[];
   [key: string]: unknown;
 }
 
@@ -66,6 +69,8 @@ export function useStream() {
     signals?: Signal[];
     recommendation?: string;
     transcript_summary?: string;
+    review_required?: boolean;
+    review_reason?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);

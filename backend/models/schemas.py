@@ -26,6 +26,8 @@ class AnalysisResult(BaseModel):
     signals: List[Signal] = []
     transcript_summary: Optional[str] = None
     recommendation: str
+    review_required: bool = False
+    review_reason: Optional[str] = None
 
 class ScamReport(BaseModel):
     id: str = Field(default_factory=lambda: f"analysis_{uuid.uuid4()}")
@@ -34,6 +36,8 @@ class ScamReport(BaseModel):
     text_analysis: Optional[AnalysisResult] = None
     combined_score: float = Field(ge=0.0, le=1.0)
     processing_time_ms: float
+    review_required: bool = False
+    review_reason: Optional[str] = None
 
 class TranscriptRequest(BaseModel):
     transcript: str = Field(max_length=10000)
