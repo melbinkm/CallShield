@@ -69,6 +69,7 @@ export function useStream() {
   const streamRef = useRef<MediaStream | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const workletRef = useRef<AudioWorkletNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const intentionalCloseRef = useRef(false);
@@ -149,6 +150,7 @@ export function useStream() {
         source.connect(worklet);
         worklet.connect(gainNode);
         audioCtxRef.current = audioCtx;
+        workletRef.current = worklet;
       };
 
       ws.onmessage = (e) => {
@@ -182,7 +184,7 @@ export function useStream() {
 
   const stopRecording = useCallback(() => {
     intentionalCloseRef.current = true;
-    // Stop audio level animation
+
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -190,21 +192,39 @@ export function useStream() {
     analyserRef.current = null;
     setAudioLevel(0);
 
-    // Stop and cleanup media stream tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
 
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close();
-      audioCtxRef.current = null;
-    }
     const ws = wsRef.current;
     wsRef.current = null;
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: "end_stream" }));
-      setTimeout(() => ws.close(), 500);
+    const worklet = workletRef.current;
+    workletRef.current = null;
+    const audioCtx = audioCtxRef.current;
+    audioCtxRef.current = null;
+
+    const finish = () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "end_stream" }));
+        setTimeout(() => ws.close(), 500);
+      }
+      audioCtx?.close();
+    };
+
+    if (worklet) {
+      // Flush any samples accumulated in the worklet that haven't reached 5s yet
+      const fallback = setTimeout(finish, 300);
+      worklet.port.onmessage = (e: MessageEvent<Float32Array>) => {
+        clearTimeout(fallback);
+        if (e.data.length > 0 && ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(encodeWAV(e.data, 16000));
+        }
+        finish();
+      };
+      worklet.port.postMessage({ type: "flush" });
+    } else {
+      finish();
     }
   }, []);
 

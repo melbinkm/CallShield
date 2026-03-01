@@ -8,6 +8,26 @@ class PCMProcessor extends AudioWorkletProcessor {
     this._chunks = [];
     this._sampleCount = 0;
     this._chunkSamples = 16000 * 5; // 5 seconds at 16 kHz
+
+    // Flush remaining samples on demand (e.g. when recording stops early)
+    this.port.onmessage = (e) => {
+      if (e.data?.type === "flush") {
+        if (this._sampleCount > 0) {
+          const merged = new Float32Array(this._sampleCount);
+          let offset = 0;
+          for (const chunk of this._chunks) {
+            merged.set(chunk, offset);
+            offset += chunk.length;
+          }
+          this.port.postMessage(merged, [merged.buffer]);
+        } else {
+          // Nothing buffered — send empty signal so the caller can proceed
+          this.port.postMessage(new Float32Array(0));
+        }
+        this._chunks = [];
+        this._sampleCount = 0;
+      }
+    };
   }
 
   process(inputs) {

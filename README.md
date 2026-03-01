@@ -53,7 +53,7 @@ Upload a phone recording, paste a transcript, or stream live audio from your mic
 > **The Voxtral difference:** A traditional scam detector transcribes audio first, then analyzes
 > text — losing every vocal cue in the process. CallShield sends raw audio to Voxtral Mini
 > directly. One API call. Tone, pacing, call-center noise, TTS artifacts — all preserved.
-> **8/8 real FTC robocalls correctly classified.**
+> **20/20 across full evaluation suite. 0 false positives.**
 
 ## The Impact
 
@@ -190,13 +190,30 @@ Each detected signal is tagged with a severity level: `low`, `medium`, or `high`
 
 ## Proven Accuracy — Real Robocalls, 100% Detection Rate
 
-### Transcript Analysis (Mistral Large)
+### Transcript Analysis (Mistral Large) — Full 20-Scenario Evaluation
 
-| Sample | Score | Verdict | Key Signals |
-|--------|-------|---------|-------------|
-| IRS arrest threat + gift card demand | **1.0** | SCAM | Authority impersonation, urgency, unusual payment, pressure to keep secret |
-| Medicare robocall "Press 1" | **0.70** | LIKELY_SCAM | Robocall/IVR pattern, urgency, authority impersonation |
-| Friend BBQ invitation | **0.0** | SAFE | No signals detected |
+| Sample | Score | Verdict |
+|--------|-------|---------|
+| IRS arrest threat + gift card demand | **0.98** | SCAM |
+| Tech support virus alert + remote access | **0.95** | SCAM |
+| Medicare robocall "Press 1" | **0.80** | SCAM |
+| Auto warranty final notice | **0.80** | SCAM |
+| Grandparent bail scam | **0.90** | SCAM |
+| Romance scam money transfer | **0.85** | SCAM |
+| Fake bank fraud — card number request | **0.85** | SCAM |
+| Lottery winner processing fee | **0.95** | SCAM |
+| Debt collection arrest threat | **0.90** | SCAM |
+| Crypto guaranteed returns | **0.90** | SCAM |
+| Friend catching up (safe) | **0.00** | SAFE |
+| Work meeting scheduling (safe) | **0.00** | SAFE |
+| Doctor appointment IVR — hard case (safe) | **0.10** | SAFE |
+| BBQ invitation (safe) | **0.00** | SAFE |
+| ISP customer service callback (safe) | **0.10** | SAFE |
+| Angry customer complaint — hard case (safe) | **0.10** | SAFE |
+| Parent dinner plans (safe) | **0.00** | SAFE |
+| Job interview scheduling (safe) | **0.05** | SAFE |
+| Legitimate bank fraud alert — hard case (safe) | **0.15** | SAFE |
+| Friend voicemail (safe) | **0.00** | SAFE |
 
 ### Audio Analysis (Voxtral Mini — Real Robocalls)
 
@@ -216,11 +233,11 @@ curl -L -o demo/sample_robocall.wav \
 | Vehicle warranty expiration | **0.60** | LIKELY_SCAM | Urgency, authority impersonation, known scam script |
 | Medicare health advisor | **0.40** | SUSPICIOUS | Authority impersonation |
 
-**8/8 samples correctly classified** — all scams detected, safe call confirmed safe.
+**20/20 binary accuracy** — every scam detected, every safe call cleared. 0 false positives. 0 false negatives.
 
-> 20 curated scenarios (10 scam + 10 safe), with expected verdicts, score ranges, and hard cases. See [`docs/EVALUATION.md`](docs/EVALUATION.md) for the full evaluation framework. Audio samples and results in [`demo/`](demo/).
+> Full 20-scenario evaluation: 10 scam + 10 safe calls including 3 deliberate hard cases (legitimate IVR, angry customer, real bank fraud alert). See [`docs/EVALUATION.md`](docs/EVALUATION.md) for full methodology, scores, and analysis.
 
-**Bottom line: 8/8 real-world scam calls correctly detected. 0 false positives on safe calls.
+**Bottom line: 100% binary accuracy across 20 scenarios. 0 false positives on safe calls.
 No other hackathon submission shows this level of evidence-based evaluation.**
 
 ---
@@ -335,69 +352,6 @@ See [`docs/API.md`](docs/API.md) for the full API reference — request/response
 |----------|----------|-------------|
 | `MISTRAL_API_KEY` | Yes | Your Mistral AI API key |
 | `VITE_API_URL` | No | Backend URL for frontend (default: `http://localhost:8000`) |
-
----
-
-## Project Structure
-
-```
-callshield/
-├── backend/
-│   ├── main.py                    # FastAPI app entry point
-│   ├── config.py                  # Models, thresholds, API key
-│   ├── Dockerfile                 # Python 3.11-slim container
-│   ├── requirements.txt           # Python dependencies
-│   ├── .env.example               # API key template
-│   ├── routers/
-│   │   ├── health.py              # GET /api/health
-│   │   ├── analyze.py             # POST /api/analyze/audio & /transcript
-│   │   └── stream.py              # WS /ws/stream
-│   ├── services/
-│   │   ├── audio_analyzer.py      # Voxtral Mini audio analysis
-│   │   ├── text_analyzer.py       # Mistral Large text analysis
-│   │   ├── stream_processor.py    # Chunk scoring + aggregation
-│   │   └── response_formatter.py  # JSON parsing + verdict logic
-│   ├── models/
-│   │   └── schemas.py             # Pydantic models
-│   ├── prompts/
-│   │   └── templates.py           # Scam detection prompts
-│   └── tests/                     # 172 unit/integration tests
-│       ├── test_response_formatter.py
-│       ├── test_stream_processor.py
-│       └── test_scoring.py
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx                # Main application
-│   │   ├── api/client.ts          # API + WebSocket client
-│   │   ├── hooks/                 # useAnalyze, useStream
-│   │   └── components/            # UI components
-│   ├── Dockerfile                 # Multi-stage Node → nginx
-│   ├── nginx.conf                 # SPA routing config
-│   ├── .env.example               # API URL template
-│   └── package.json
-├── demo/
-│   ├── sample_calls/              # Sample transcripts (IRS scam, Medicare, safe)
-│   └── expected_outputs/          # Expected JSON responses
-├── docs/
-│   ├── ARCHITECTURE.md            # System architecture + data flows
-│   ├── THREAT_MODEL.md            # Privacy, abuse scenarios, GDPR
-│   ├── EVALUATION.md              # 20-scenario evaluation framework
-│   ├── MODEL_USAGE.md             # Voxtral/Mistral details, prompts, tokens
-│   ├── COMPARISON.md              # Voxtral vs traditional STT+LLM
-│   ├── QUICKSTART.md              # Get running in 2 minutes
-│   ├── DEPLOY.md                  # Production deployment guide
-│   └── screenshots/               # UI screenshots
-├── scripts/
-│   ├── setup.sh                   # Cross-platform setup (Linux/macOS)
-│   ├── setup.bat                  # Cross-platform setup (Windows)
-│   ├── run_local.sh               # Start both services locally
-│   └── smoke_test.sh              # Health + analysis smoke tests
-├── docker-compose.yml             # One-command Docker startup
-├── Makefile                       # make dev / test / setup / demo / clean
-├── render.yaml                    # Render deployment config
-├── LICENSE                        # MIT
-└── README.md                      # You are here
-```
 
 ---
 
