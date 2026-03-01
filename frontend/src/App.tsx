@@ -119,6 +119,8 @@ export default function App() {
           recommendation={bestRecommendation}
           audioLevel={audioLevel}
           hasResults={partialResults.length > 0}
+          latestChunk={partialResults[partialResults.length - 1]}
+          chunks={partialResults}
         />
 
         {error && (

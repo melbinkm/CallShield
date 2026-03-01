@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
+interface ChunkData {
+  scam_score?: number;
+  confidence?: number;
+  [key: string]: unknown;
+}
+
 interface Props {
   isRecording: boolean;
   onStart: () => void;
@@ -9,9 +15,11 @@ interface Props {
   recommendation?: string;
   audioLevel?: number;
   hasResults?: boolean;
+  latestChunk?: ChunkData;
+  chunks?: ChunkData[];
 }
 
-export default function MicRecorder({ isRecording, onStart, onStop, cumulativeScore, verdict, recommendation, audioLevel = 0, hasResults = false }: Props) {
+export default function MicRecorder({ isRecording, onStart, onStop, cumulativeScore, verdict, recommendation, audioLevel = 0, hasResults = false, latestChunk, chunks = [] }: Props) {
   const [countdown, setCountdown] = useState(5);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -119,6 +127,21 @@ export default function MicRecorder({ isRecording, onStart, onStop, cumulativeSc
               {verdict.replace("_", " ")}
             </span>
           )}
+          {latestChunk?.confidence !== undefined && (
+            <span className="text-sm text-gray-400">
+              {Math.round(latestChunk.confidence * 100)}% confidence
+            </span>
+          )}
+          {(() => {
+            const trend = chunks.length >= 2
+              ? (chunks[chunks.length - 1].scam_score ?? 0) - (chunks[chunks.length - 2].scam_score ?? 0)
+              : 0;
+            const trendLabel = trend > 0.05 ? "\u2191 Rising" : trend < -0.05 ? "\u2193 Falling" : "\u2192 Stable";
+            const trendColor = trend > 0.05 ? "text-red-400" : trend < -0.05 ? "text-green-400" : "text-gray-400";
+            return chunks.length >= 2 ? (
+              <span className={`text-sm ${trendColor}`}>{trendLabel}</span>
+            ) : null;
+          })()}
           {recommendation && (
             <p className="text-sm text-blue-400 italic text-center max-w-md">
               {recommendation}

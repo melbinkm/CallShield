@@ -122,6 +122,7 @@ class StreamProcessor:
             "scam_score": round(chunk_score, 4),
             "cumulative_score": round(self.cumulative_score, 4),
             "max_score": round(self.max_score, 4),
+            "confidence": round(float(data.get("confidence", 0.0)), 4),
             "verdict": data.get("verdict", "SAFE"),
             "signals": signals,
             "recommendation": data.get("recommendation", ""),

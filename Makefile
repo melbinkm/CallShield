@@ -14,7 +14,10 @@ demo:
 	./scripts/smoke_test.sh
 
 eval:
-	python scripts/run_evaluation.py --url https://callshield.onrender.com
+	python scripts/run_evaluation.py \
+	  --url https://callshield.onrender.com \
+	  --output-json docs/evaluation_results_latest.json \
+	  --output-md docs/evaluation_results_latest.md
 
 setup:
 	./scripts/setup.sh

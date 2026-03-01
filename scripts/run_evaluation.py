@@ -20,7 +20,9 @@ Exit code: 0 if binary accuracy is 100%, 1 otherwise.
 """
 
 import argparse
+import datetime
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -207,6 +209,7 @@ def run(base_url: str, api_key: str, delay: float) -> List[Dict]:
             data=payload,
             headers=headers,
         )
+        t0 = time.monotonic()
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read())
@@ -218,6 +221,7 @@ def run(base_url: str, api_key: str, delay: float) -> List[Dict]:
             score, verdict, error = None, "ERROR", f"HTTP {e.code}: {e.read()[:120]}"
         except Exception as e:
             score, verdict, error = None, "ERROR", str(e)
+        elapsed_ms = round((time.monotonic() - t0) * 1000)
 
         binary_match = (is_positive(verdict) == is_positive(expected)) if verdict != "ERROR" else False
         exact_match = verdict == expected
@@ -231,6 +235,7 @@ def run(base_url: str, api_key: str, delay: float) -> List[Dict]:
             "binary_match": binary_match,
             "exact_match": exact_match,
             "error": error,
+            "processing_time_ms": elapsed_ms,
         })
 
         status = "OK  " if binary_match else "MISS"
@@ -303,6 +308,88 @@ def print_summary(results: List[Dict]) -> int:
     return 0 if binary_correct == total else 1
 
 
+def compute_metrics(results: List[Dict]) -> Dict:
+    """Compute evaluation metrics from results list."""
+    total = len(results)
+    binary_correct = sum(1 for r in results if r["binary_match"])
+
+    scam_results = [r for r in results if r["expected"] != "SAFE"]
+    safe_results = [r for r in results if r["expected"] == "SAFE"]
+
+    tp = sum(1 for r in scam_results if r["binary_match"])
+    fn = len(scam_results) - tp
+    tn = sum(1 for r in safe_results if r["binary_match"])
+    fp = len(safe_results) - tn
+
+    return {
+        "total": total,
+        "correct": binary_correct,
+        "binary_accuracy": binary_correct / total if total else 0.0,
+        "false_positives": fp,
+        "false_negatives": fn,
+    }
+
+
+def write_artifacts(results: List[Dict], metrics: Dict, args) -> None:
+    """Write JSON and/or markdown artifacts if output paths are specified."""
+    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    if args.output_json:
+        payload = {
+            "timestamp": timestamp,
+            "metrics": metrics,
+            "results": [
+                {
+                    "scenario_id": r["id"],
+                    "expected": r["expected"],
+                    "verdict": r["verdict"],
+                    "score": r["score"],
+                    "passed": r["binary_match"],
+                    "processing_time_ms": r["processing_time_ms"],
+                }
+                for r in results
+            ],
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(args.output_json)), exist_ok=True)
+        with open(args.output_json, "w") as f:
+            json.dump(payload, f, indent=2)
+        print(f"\nJSON results written to {args.output_json}")
+
+    if args.output_md:
+        lines = [
+            "# CallShield Evaluation Results",
+            "",
+            f"Generated: {timestamp}",
+            "",
+            "## Results",
+            "",
+            "| ID | Expected | Verdict | Score | Pass | Time (ms) |",
+            "|----|----------|---------|-------|------|-----------|",
+        ]
+        for r in results:
+            score_str = f"{r['score']:.2f}" if r["score"] is not None else "ERR"
+            pass_mark = "PASS" if r["binary_match"] else "FAIL"
+            lines.append(
+                f"| {r['id']} | {r['expected']} | {r['verdict']} | {score_str} "
+                f"| {pass_mark} | {r['processing_time_ms']} |"
+            )
+        total = metrics["total"]
+        correct = metrics["correct"]
+        pct = metrics["binary_accuracy"] * 100
+        lines += [
+            "",
+            "## Metrics",
+            "",
+            f"- Binary accuracy: {correct}/{total} = {pct:.2f}%",
+            f"- False positives: {metrics['false_positives']}",
+            f"- False negatives: {metrics['false_negatives']}",
+        ]
+        os.makedirs(os.path.dirname(os.path.abspath(args.output_md)), exist_ok=True)
+        with open(args.output_md, "w") as f:
+            f.write("\n".join(lines) + "\n")
+        print(f"Markdown results written to {args.output_md}")
+
+
 def main() -> int:
 
     parser = argparse.ArgumentParser(description="CallShield evaluation runner")
@@ -312,13 +399,20 @@ def main() -> int:
                         help="API key (leave empty when auth is disabled)")
     parser.add_argument("--delay", type=float, default=1.0,
                         help="Seconds between requests (default: 1.0)")
+    parser.add_argument("--output-json", dest="output_json", default=None,
+                        help="Write results JSON to this file path")
+    parser.add_argument("--output-md", dest="output_md", default=None,
+                        help="Write markdown summary to this file path")
     args = parser.parse_args()
 
     print(f"CallShield Evaluation — {args.url}")
     print(f"Running {len(SCENARIOS)} scenarios...\n")
 
     results = run(args.url, args.api_key, args.delay)
-    return print_summary(results)
+    exit_code = print_summary(results)
+    metrics = compute_metrics(results)
+    write_artifacts(results, metrics, args)
+    return exit_code
 
 
 if __name__ == "__main__":

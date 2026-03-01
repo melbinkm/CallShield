@@ -7,6 +7,7 @@ interface PartialResult {
   chunk_index?: number;
   scam_score?: number;
   cumulative_score?: number;
+  confidence?: number;
   verdict?: string;
   signals?: Signal[];
   recommendation?: string;

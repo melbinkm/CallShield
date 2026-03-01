@@ -5,6 +5,12 @@ import MicRecorder from "./MicRecorder";
 
 type Tab = "upload" | "record" | "paste";
 
+interface ChunkData {
+  scam_score?: number;
+  confidence?: number;
+  [key: string]: unknown;
+}
+
 interface Props {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
@@ -19,6 +25,8 @@ interface Props {
   recommendation?: string;
   audioLevel?: number;
   hasResults?: boolean;
+  latestChunk?: ChunkData;
+  chunks?: ChunkData[];
 }
 
 export default function InputPanel({
@@ -35,6 +43,8 @@ export default function InputPanel({
   recommendation,
   audioLevel,
   hasResults,
+  latestChunk,
+  chunks,
 }: Props) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -53,6 +63,8 @@ export default function InputPanel({
             recommendation={recommendation}
             audioLevel={audioLevel}
             hasResults={hasResults}
+            latestChunk={latestChunk}
+            chunks={chunks}
           />
         )}
         {activeTab === "paste" && (
