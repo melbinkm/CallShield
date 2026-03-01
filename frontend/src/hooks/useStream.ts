@@ -94,7 +94,13 @@ export function useStream() {
     intentionalCloseRef.current = false;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          noiseSuppression: false,   // preserve call-center noise Voxtral can detect
+          echoCancellation: false,   // preserve TTS/robocall audio artifacts
+          autoGainControl: false,    // preserve natural volume dynamics
+        },
+      });
       streamRef.current = stream;
       const ws = createStreamSocket();
       wsRef.current = ws;
@@ -157,7 +163,7 @@ export function useStream() {
           } else if (data.type === "error") {
             setError(data.detail);
           }
-        } catch (err) {
+        } catch {
           setError("Invalid message from server");
         }
       };

@@ -40,6 +40,8 @@ function formatReportForClipboard(report: ScamReport): string {
 }
 
 export default function AnalysisPanel({ report, isLoading }: Props) {
+  const [copied, setCopied] = useState(false);
+
   if (isLoading) {
     return (
       <div className="bg-gray-800 rounded-lg p-12 text-center">
@@ -48,8 +50,6 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
       </div>
     );
   }
-
-  const [copied, setCopied] = useState(false);
 
   if (!report) return null;
 

@@ -18,21 +18,23 @@ export default function MicRecorder({ isRecording, onStart, onStop, cumulativeSc
   // Countdown timer for first chunk wait
   useEffect(() => {
     if (isRecording && !hasResults) {
-      setCountdown(5);
+      // Defer the reset to avoid synchronous setState inside an effect body
+      const init = setTimeout(() => setCountdown(5), 0);
       timerRef.current = setInterval(() => {
         setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      return () => {
+        clearTimeout(init);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      };
     }
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   }, [isRecording, hasResults]);
 
   // Generate audio level bars
