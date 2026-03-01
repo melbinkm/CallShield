@@ -115,20 +115,28 @@ class TestStreamProcessorState:
         assert sp.max_score == 0.9
 
     def test_get_final_result_verdict_mapping(self):
-        """Verify get_final_result uses score_to_verdict correctly."""
+        """Verify get_final_result uses score_to_verdict correctly.
+
+        combined_score = 0.6 * max_score + 0.4 * cumulative_score, so both
+        attributes must be set to produce the expected combined value.
+        """
         sp = StreamProcessor()
         sp.cumulative_score = 0.25
+        sp.max_score = 0.25
         result = sp.get_final_result()
         assert result["verdict"] == "SAFE"
         assert result["type"] == "final_result"
 
         sp.cumulative_score = 0.45
+        sp.max_score = 0.45
         assert sp.get_final_result()["verdict"] == "SUSPICIOUS"
 
         sp.cumulative_score = 0.70
+        sp.max_score = 0.70
         assert sp.get_final_result()["verdict"] == "LIKELY_SCAM"
 
         sp.cumulative_score = 0.90
+        sp.max_score = 0.90
         assert sp.get_final_result()["verdict"] == "SCAM"
 
     def test_get_final_result_signals(self):
@@ -146,7 +154,7 @@ class TestStreamProcessorState:
         sp.last_transcript_summary = "Caller claims to be bank"
         result = sp.get_final_result()
         assert result["total_chunks"] == 3
-        assert result["combined_score"] == 0.42
+        assert result["combined_score"] == round(0.6 * 0.65 + 0.4 * 0.42, 4)  # 0.558
         assert result["max_score"] == 0.65
         assert result["recommendation"] == "Be cautious"
         assert result["transcript_summary"] == "Caller claims to be bank"
