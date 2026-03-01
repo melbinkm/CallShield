@@ -20,16 +20,16 @@ This tool is provided "as is" without warranty of any kind, express or implied.
 
 ```mermaid
 flowchart TD
-    Browser["Browser\n(React Frontend)"]
+    Browser["Browser<br/>(React Frontend)"]
     Recorder["MediaRecorder / AudioWorklet"]
-    Server["FastAPI — Python Server\nIN-MEMORY ONLY · no database · no disk writes"]
-    Mistral["Mistral API\n(External SaaS)"]
-    State["Browser — React State\nDisplayed in UI · no persistence · lost on reload"]
+    Server["FastAPI — Python Server<br/>IN-MEMORY ONLY · no database · no disk writes"]
+    Mistral["Mistral API<br/>(External SaaS)"]
+    State["Browser — React State<br/>Displayed in UI · no persistence · lost on reload"]
 
     Browser -->|"① getUserMedia() captures mic audio"| Recorder
-    Recorder -->|"② WebSocket / POST\nbinary payload, no metadata"| Server
-    Server -->|"③ audio bytes\nVoxtral Mini + Mistral Large"| Mistral
-    Mistral -->|"④ JSON response\nscore · verdict · summary"| Server
+    Recorder -->|"② WebSocket / POST — binary payload, no metadata"| Server
+    Server -->|"③ audio bytes — Voxtral Mini + Mistral Large"| Mistral
+    Mistral -->|"④ JSON response — score · verdict · summary"| Server
     Server -->|"⑤ JSON response returned to client"| State
 ```
 

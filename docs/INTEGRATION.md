@@ -75,10 +75,10 @@ Use this pattern to score every inbound call in a contact center platform (e.g.,
 ```mermaid
 flowchart TD
     Caller["Caller"]
-    Platform["Contact Center Platform\n(Twilio / Amazon Connect / Genesys)"]
-    Splitter["Audio Splitter\nSegment into 5s WAV\n(media gateway or SIPREC recorder)"]
+    Platform["Contact Center Platform<br/>(Twilio / Amazon Connect / Genesys)"]
+    Splitter["Audio Splitter<br/>Segment into 5s WAV<br/>(media gateway or SIPREC recorder)"]
     API["CallShield API"]
-    Webhook["Webhook Handler\nTrigger alert if combined_score ≥ 0.6\nPOST verdict to your platform"]
+    Webhook["Webhook Handler<br/>Trigger alert if combined_score ≥ 0.6<br/>POST verdict to your platform"]
 
     Caller -->|"inbound call"| Platform
     Platform -->|"real-time audio stream"| Splitter
@@ -139,13 +139,13 @@ SIPREC (RFC 7245) lets carriers fork a copy of the RTP stream to a recording ser
 ```mermaid
 flowchart TD
     PSTN["PSTN"]
-    SBC["SBC\n(Session Border Controller)"]
-    SIPREC["SIPREC Recording Server\nReceives RTP · buffers 5s PCM · encodes to WAV"]
+    SBC["SBC<br/>(Session Border Controller)"]
+    SIPREC["SIPREC Recording Server<br/>Receives RTP · buffers 5s PCM · encodes to WAV"]
     API["CallShield API"]
-    Alert["Alert Bus\n(Kafka / SNS / webhook)\nPush to subscriber app or NOC"]
+    Alert["Alert Bus<br/>(Kafka / SNS / webhook)<br/>Push to subscriber app or NOC"]
 
     PSTN -->|"inbound call"| SBC
-    SBC -->|"SIPREC fork\nSIP INVITE + RTP"| SIPREC
+    SBC -->|"SIPREC fork — SIP INVITE + RTP"| SIPREC
     SIPREC -->|"WebSocket /ws/stream"| API
     API -->|"combined_score per chunk"| Alert
 ```
