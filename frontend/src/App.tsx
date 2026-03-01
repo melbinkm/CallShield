@@ -23,7 +23,6 @@ export default function App() {
       .then((data) => {
         if (data.demo_mode) {
           setShowDemoToast(true);
-          setTimeout(() => setShowDemoToast(false), 8000);
         }
       })
       .catch(() => {});
