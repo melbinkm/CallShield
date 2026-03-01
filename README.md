@@ -28,9 +28,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/verdict.png" alt="CallShield — SCAM verdict with signals" width="700">
+  <img src="docs/screenshots/Demo_Video.gif" alt="CallShield — live verdict generation" width="700">
   <br>
-  <em>Paste a transcript or upload audio → real-time score + verdict + actionable signals</em>
+  <em>Paste a transcript → score animates in real time → SCAM verdict with signals</em>
 </p>
 
 ---
