@@ -14,6 +14,14 @@
 </p>
 
 <p align="center">
+  <a href="https://callshield-ui.onrender.com/">
+    <img src="https://img.shields.io/badge/🔴%20LIVE%20DEMO-No%20API%20Key%20Required-brightgreen?style=for-the-badge&labelColor=000000" alt="Live Demo — No API Key Required">
+  </a>
+</p>
+
+> **No API key. No setup. No account.** Click the live demo above — verdicts appear in under 2 seconds.
+
+<p align="center">
   <a href="https://callshield-ui.onrender.com/">🔴 Live Demo</a>
 </p>
 
@@ -54,6 +62,22 @@ The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. Pho
 | Phase 1 (now) | REST + WebSocket API — carriers query per call |
 | Phase 2 | On-device Voxtral inference — no audio leaves the handset |
 | Phase 3 | Network-level inline scoring — real-time intercept on the PSTN |
+
+## Designed for the 5G Edge
+
+CallShield's audio-native pipeline is built for the speed requirements of live telecom infrastructure. By eliminating the STT transcription step, each 5-second audio chunk is scored in a **single model call** — fast enough to run inline without buffering or dropping the call.
+
+| Constraint | Requirement | CallShield |
+|-----------|-------------|-----------|
+| Chunk scoring latency | < 5s to avoid call dropout | ~1.5–3s per chunk |
+| Pipeline steps | Minimal for real-time path | 1 API call (vs 2 for STT+LLM) |
+| Audio format | Standard carrier formats | WAV/PCM, 8–16 kHz mono |
+| Deployment model | Stateless, horizontally scalable | FastAPI + Docker, no shared state |
+| Privacy requirement | No audio retention on network | In-memory only; discarded after scoring |
+
+> At 5G speeds, the bottleneck is inference latency, not bandwidth. Skipping STT cuts CallShield's critical path in half.
+
+→ Carrier integration recipes (Twilio, SIP SIPREC): [docs/INTEGRATION.md](docs/INTEGRATION.md)
 
 CallShield's REST + WebSocket API integrates directly with **VoIP platforms** (Twilio, Amazon Connect, Genesys) and carrier infrastructure (SIP SIPREC) — no custom audio pipeline required. → See [docs/INTEGRATION.md](docs/INTEGRATION.md) for webhook recipes and typed client examples.
 
@@ -209,6 +233,8 @@ flowchart TD
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, data flows, scoring algorithm, technical decisions |
 | [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md) | Prompt engineering, 7 detection dimensions, token estimates |
 | [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Privacy analysis, abuse mitigations, GDPR/CCPA, red-team cases |
+| [docs/ADVERSARIAL_TESTING.md](docs/ADVERSARIAL_TESTING.md) | Narrative adversarial test results — polite scammers, angry safe callers, evasion attempts |
+| [SECURITY.md](SECURITY.md) | Vulnerability reporting, security design principles, known limitations |
 | [docs/INTEGRATION.md](docs/INTEGRATION.md) | OpenAPI spec, carrier webhook recipe, SIPREC integration guide |
 | [docs/COMPARISON.md](docs/COMPARISON.md) | Voxtral native audio vs STT+LLM pipeline — latency, accuracy, cost |
 | [docs/QUICKSTART.md](docs/QUICKSTART.md) | Docker, manual setup, one-line script |

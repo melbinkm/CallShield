@@ -15,6 +15,10 @@ interface PartialResult {
   timestamp_ms?: number;
   score_delta?: number;
   new_signals?: Signal[];
+  chunk_processing_ms?: number;
+  vocal_stress?: number;
+  background_noise?: number;
+  synthetic_voice_probability?: number;
   [key: string]: unknown;
 }
 

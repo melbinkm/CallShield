@@ -150,6 +150,53 @@ export default function App() {
           onToggle={() => setShowLog((v) => !v)}
         />
 
+        {/* Acoustic Context — live panel during recording */}
+        {isRecording && partialResults.length > 0 && (() => {
+          const latest = partialResults[partialResults.length - 1];
+          const hasAcoustics = latest.vocal_stress !== undefined ||
+            latest.background_noise !== undefined ||
+            latest.synthetic_voice_probability !== undefined;
+          if (!hasAcoustics) return null;
+          const bars = [
+            { label: "Vocal Stress", value: latest.vocal_stress ?? 0, color: "bg-red-500" },
+            { label: "Background Noise", value: latest.background_noise ?? 0, color: "bg-yellow-500" },
+            { label: "Synth Voice Prob.", value: latest.synthetic_voice_probability ?? 0, color: "bg-purple-500" },
+          ];
+          return (
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Acoustic Context <span className="text-blue-400 ml-1">● Live</span>
+                </h3>
+                {latest.chunk_processing_ms !== undefined && (
+                  <span className="text-xs text-gray-500 font-mono">
+                    Last chunk: {latest.chunk_processing_ms}ms
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {bars.map(({ label, value, color }) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-400 w-36 shrink-0">{label}</span>
+                    <div className="flex-1 bg-gray-700 rounded-full h-2">
+                      <div
+                        className={`${color} h-2 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.round(value * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-300 font-mono w-8 text-right">
+                      {Math.round(value * 100)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-600 mt-2 italic">
+                Voxtral is analyzing raw audio — not text transcripts
+              </p>
+            </div>
+          );
+        })()}
+
         {/* Loading card while waiting for final analysis */}
         {!isRecording && isProcessingFinal && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">

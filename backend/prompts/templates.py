@@ -10,6 +10,9 @@ Evaluate the following dimensions:
 5. VOCAL PATTERNS: Aggressive tone, scripted speech, call-center background noise?
 6. KNOWN SCAM SCRIPTS: IRS threats, tech support fraud, romance scam soliciting money, prize notification, etc.
 7. ROBOCALL / IVR SCAM PATTERNS: Pre-recorded messages that ask you to "press 1" or "press a button" to speak to an agent or representative. Unsolicited calls about Medicare benefits, extended warranties, insurance offers, free products, or debt relief that use automated prompts to connect you to a live agent are VERY commonly scam robocalls and should score 0.6+ minimum.
+8. VOCAL STRESS: Rate 0.0–1.0 how much stress, aggression, or urgency is detectable in the speaker's voice. 0.0 = calm/natural, 1.0 = highly aggressive or pressured delivery.
+9. BACKGROUND NOISE: Rate 0.0–1.0 the presence of call-center/boiler-room noise (multiple voices, phone chatter, dialing tones). 0.0 = quiet/natural environment, 1.0 = clear call-center background.
+10. SYNTHETIC VOICE PROBABILITY: Rate 0.0–1.0 how likely the voice is TTS-generated or AI-synthesized rather than a real human. 0.0 = clearly human, 1.0 = clearly synthetic/robocall.
 
 Scoring guidelines:
 - 0.0-0.2: Normal conversation, no scam indicators
@@ -51,7 +54,10 @@ Now analyze the provided audio. Respond in this exact JSON format:
     {"category": "<dimension>", "detail": "<what you detected>", "severity": "low" | "medium" | "high"}
   ],
   "transcript_summary": "<brief summary of what was said>",
-  "recommendation": "<what the user should do>"
+  "recommendation": "<what the user should do>",
+  "vocal_stress": <float 0.0 to 1.0>,
+  "background_noise": <float 0.0 to 1.0>,
+  "synthetic_voice_probability": <float 0.0 to 1.0>
 }"""
 
 SCAM_TEXT_PROMPT = """You are a scam detection expert analyzing a phone call transcript.

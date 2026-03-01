@@ -43,7 +43,8 @@ class StreamProcessor:
         """Process a single audio chunk and return partial result."""
         # Always increment chunk_index to avoid duplicates
         self.chunk_index += 1
-        
+        chunk_start_time = time.time()
+
         timestamp_ms = int((time.time() - self.start_time) * 1000)
 
         if is_silent(audio_chunk):
@@ -53,6 +54,10 @@ class StreamProcessor:
                 "timestamp_ms": timestamp_ms,
                 "score_delta": 0.0,
                 "new_signals": [],
+                "chunk_processing_ms": int((time.time() - chunk_start_time) * 1000),
+                "vocal_stress": 0.0,
+                "background_noise": 0.0,
+                "synthetic_voice_probability": 0.0,
                 "scam_score": 0.0,
                 "cumulative_score": round(self.cumulative_score, 4),
                 "verdict": "SAFE",
@@ -112,6 +117,11 @@ class StreamProcessor:
         finally:
             resp.close()
 
+        vocal_stress = max(0.0, min(1.0, float(data.get("vocal_stress", 0.0))))
+        background_noise = max(0.0, min(1.0, float(data.get("background_noise", 0.0))))
+        synthetic_voice_probability = max(0.0, min(1.0, float(data.get("synthetic_voice_probability", 0.0))))
+        chunk_processing_ms = int((time.time() - chunk_start_time) * 1000)
+
         chunk_score = float(data.get("scam_score", 0.0))
         signals = data.get("signals", [])
         self.last_recommendation = data.get("recommendation", "")
@@ -139,6 +149,10 @@ class StreamProcessor:
             "timestamp_ms": timestamp_ms,
             "score_delta": round(score_delta, 4),
             "new_signals": new_signals,
+            "chunk_processing_ms": chunk_processing_ms,
+            "vocal_stress": round(vocal_stress, 3),
+            "background_noise": round(background_noise, 3),
+            "synthetic_voice_probability": round(synthetic_voice_probability, 3),
             "scam_score": round(chunk_score, 4),
             "cumulative_score": round(self.cumulative_score, 4),
             "max_score": round(self.max_score, 4),
