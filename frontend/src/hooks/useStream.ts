@@ -12,6 +12,7 @@ interface PartialResult {
   signals?: Signal[];
   recommendation?: string;
   transcript_summary?: string;
+  [key: string]: unknown;
 }
 
 // WAV encoder helpers
