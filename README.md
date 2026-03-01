@@ -95,6 +95,23 @@ minutes of US PSTN traffic, full inline scoring would cost ~$180M/year — less 
 
 → Carrier integration recipes (Twilio, SIP SIPREC): [docs/INTEGRATION.md](docs/INTEGRATION.md)
 
+---
+
+## Use Cases
+
+> *Every other solution reads what the scammer said. CallShield hears how they said it — and that's the part they can't fake.*
+
+| Use case | How CallShield helps |
+|----------|---------------------|
+| **Telecom carrier — inline scoring** | Score every call on the PSTN before it reaches the subscriber. One deployment protects millions of users network-wide — no app install required. |
+| **Elder care protection** | Flag high-risk calls in real time and alert a family member via downstream webhook. No behavior change needed from the person being protected. |
+| **Enterprise vishing defense** | Sit on the corporate PBX. When an employee is being socially engineered into wiring money or revealing credentials, the security team is alerted mid-call. |
+| **AI voice / deepfake detection** | Voice-cloning tools let scammers impersonate anyone. Voxtral's acoustic analysis detects TTS artifacts and synthetic cadence that survive word-for-word transcription — invisible to text-only models. |
+| **Call center agent assist** | Show agents a silent risk indicator for inbound callers — fraud rings increasingly impersonate customers. No verdict shared with the caller. |
+| **Insurance claims fraud** | Scripted, coached calls have unnatural cadence. CallShield flags rehearsed delivery patterns that text analysis misses entirely. |
+
+---
+
 CallShield's REST + WebSocket API integrates directly with **VoIP platforms** (Twilio, Amazon Connect, Genesys) and carrier infrastructure (SIP SIPREC) — no custom audio pipeline required. → See [docs/INTEGRATION.md](docs/INTEGRATION.md) for webhook recipes and typed client examples.
 
 ---
