@@ -29,10 +29,10 @@
 
 <p align="center">
   <a href="https://www.loom.com/share/45a875f7ea6b475994c19ac456c82f5c">
-    <img src="https://cdn.loom.com/sessions/thumbnails/45a875f7ea6b475994c19ac456c82f5c-with-play.gif" alt="CallShield — Listening for Lies (2 min demo)" width="700">
+    <img src="https://cdn.loom.com/sessions/thumbnails/45a875f7ea6b475994c19ac456c82f5c-with-play.gif" alt="CallShield — Listening for Lies (5 min demo)" width="700">
   </a>
   <br>
-  <em>▶ Click to watch: CallShield — Listening for Lies (2 min)</em>
+  <a href="https://www.loom.com/share/45a875f7ea6b475994c19ac456c82f5c"><em>▶ Click to watch: CallShield — Listening for Lies (5 min)</em></a>
 </p>
 
 <p align="center">
