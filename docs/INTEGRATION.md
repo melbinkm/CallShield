@@ -191,6 +191,104 @@ ffmpeg -f mulaw -ar 8000 -ac 1 -i chunk.raw \
 
 ---
 
+## Typed Client Examples
+
+### Python (`httpx`)
+
+```python
+import httpx
+
+CALLSHIELD_URL = "https://callshield-backend.onrender.com"
+
+# Analyze a transcript
+def analyze_transcript(transcript: str) -> dict:
+    with httpx.Client(timeout=30) as client:
+        resp = client.post(
+            f"{CALLSHIELD_URL}/analyze/text",
+            json={"transcript": transcript},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+# Analyze a WAV file
+def analyze_audio(wav_path: str) -> dict:
+    with httpx.Client(timeout=60) as client:
+        with open(wav_path, "rb") as f:
+            resp = client.post(
+                f"{CALLSHIELD_URL}/analyze/audio",
+                files={"file": ("recording.wav", f, "audio/wav")},
+            )
+        resp.raise_for_status()
+        return resp.json()
+
+# Usage
+result = analyze_transcript("Hello, this is Agent Thompson from the IRS...")
+print(f"Score: {result['combined_score']:.0%}  Verdict: {result['text_analysis']['verdict']}")
+# Score: 94%  Verdict: SCAM
+```
+
+### TypeScript (`fetch`)
+
+```typescript
+const CALLSHIELD_URL = "https://callshield-backend.onrender.com";
+
+interface Signal {
+  category: string;
+  detail: string;
+  severity: "low" | "medium" | "high";
+}
+
+interface AnalysisResult {
+  scam_score: number;
+  confidence: number;
+  verdict: "SAFE" | "SUSPICIOUS" | "LIKELY_SCAM" | "SCAM";
+  signals: Signal[];
+  recommendation: string;
+}
+
+interface ScamReport {
+  id: string;
+  mode: string;
+  combined_score: number;
+  audio_analysis: AnalysisResult | null;
+  text_analysis: AnalysisResult | null;
+  processing_time_ms: number;
+  review_required: boolean;
+  review_reason: string | null;
+  analyzed_at: string;
+}
+
+// Analyze a transcript
+async function analyzeTranscript(transcript: string): Promise<ScamReport> {
+  const resp = await fetch(`${CALLSHIELD_URL}/analyze/text`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transcript }),
+  });
+  if (!resp.ok) throw new Error(`CallShield error: ${resp.status}`);
+  return resp.json();
+}
+
+// Analyze a WAV file (browser)
+async function analyzeAudio(file: File): Promise<ScamReport> {
+  const form = new FormData();
+  form.append("file", file);
+  const resp = await fetch(`${CALLSHIELD_URL}/analyze/audio`, {
+    method: "POST",
+    body: form,
+  });
+  if (!resp.ok) throw new Error(`CallShield error: ${resp.status}`);
+  return resp.json();
+}
+
+// Usage
+const result = await analyzeTranscript("Hello, this is Agent Thompson from the IRS...");
+console.log(`Score: ${Math.round(result.combined_score * 100)}% — ${result.text_analysis?.verdict}`);
+// Score: 94% — SCAM
+```
+
+---
+
 ## Error Handling
 
 | HTTP Status | Meaning | Recommended Action |

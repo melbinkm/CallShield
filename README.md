@@ -13,19 +13,6 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
 </p>
 
-## Claim-Proof Scoreboard
-
-| Claim | Evidence | Artifact | How to reproduce |
-|-------|----------|----------|-----------------|
-| 25/25 detection accuracy | 100% on curated eval set (20 scam + 5 adversarial) | [docs/EVALUATION.md](docs/EVALUATION.md) | `python scripts/run_evaluation.py --url http://localhost:8000` |
-| Zero false positives | 0/10 safe calls misclassified | [docs/EVALUATION.md](docs/EVALUATION.md) | Run evaluation script, inspect L01–L10 rows |
-| 184 automated tests | Full unit + integration suite | [backend/tests/](backend/tests/) | `cd backend && pytest --tb=short -q` |
-| Audio-native advantage | Voxtral processes raw WAV — no transcription step | [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md) | Upload WAV; compare audio vs text scores in report |
-| Privacy-first design | Zero audio storage; in-memory only | [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Review Sections 3–5 of threat model |
-| Production latency | < 3s per 5s audio chunk | [docs/EVALUATION.md](docs/EVALUATION.md) | Record 10s live; watch chunk timestamps in log |
-
----
-
 <p align="center">
   <a href="https://callshield-ui.onrender.com/">🔴 Live Demo</a>
 </p>
@@ -67,6 +54,57 @@ The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. Pho
 | Phase 1 (now) | REST + WebSocket API — carriers query per call |
 | Phase 2 | On-device Voxtral inference — no audio leaves the handset |
 | Phase 3 | Network-level inline scoring — real-time intercept on the PSTN |
+
+CallShield's REST + WebSocket API integrates directly with **VoIP platforms** (Twilio, Amazon Connect, Genesys) and carrier infrastructure (SIP SIPREC) — no custom audio pipeline required. → See [docs/INTEGRATION.md](docs/INTEGRATION.md) for webhook recipes and typed client examples.
+
+---
+
+## Features
+
+### Detection & Analysis
+- **3 input modes** — Live microphone recording, WAV file upload, transcript paste
+- **Real-time streaming** — WebSocket pipeline scores each 5-second audio chunk as it arrives; verdict builds incrementally
+- **Dual-model verification** — Voxtral Mini scores raw audio natively; Mistral Large runs a second-opinion on any call scoring above 0.5
+- **7 scam detection dimensions** — Urgency tactics, authority impersonation, information extraction, emotional manipulation, vocal patterns, known scam scripts, robocall/IVR patterns
+- **4-tier verdict** — SAFE / SUSPICIOUS / LIKELY_SCAM / SCAM with calibrated thresholds
+- **Peak-weighted scoring** — Tracks the worst moment in a call; a friendly opener cannot dilute a later scam demand
+- **"Needs Human Review" badge** — Automatically flagged when score falls in the ambiguous band (0.35–0.65) or audio/text analyses disagree
+
+### Demo & UX
+- **One-click scenario gallery** — 6 preloaded scenarios (3 SCAM, 3 SAFE) for instant reproducible demos
+- **Live evidence timeline** — Per-chunk timestamps, score delta arrows (▲/▼), and NEW pills on first-occurrence signals
+- **Audio vs text comparison panel** — Side-by-side Voxtral vs text-only scores showing the audio-native advantage in-product
+- **Trust panel** — Model version, report ID, and analysis timestamp on every result
+- **Export JSON** — Download the full structured report for offline inspection
+- **Demo mode** — No API key required; returns realistic canned responses instantly
+
+### Integration & Production
+- **REST + WebSocket API** — `POST /analyze/audio`, `POST /analyze/text`, `WS /ws/stream`
+- **VoIP platform ready** — Twilio Media Streams webhook, Amazon Connect, Genesys, SIP SIPREC carrier integration
+- **OpenAPI spec** — Auto-generated at `/openapi.json`; interactive Swagger UI at `/docs`
+- **Typed client examples** — Python (`httpx`) and TypeScript (`fetch`) — see [docs/INTEGRATION.md](docs/INTEGRATION.md)
+- **Docker deployment** — Single `make dev` command; Render-hosted demo live now
+
+### Privacy & Security
+- **Zero audio retention** — Audio bytes live only in function-local variables; never written to disk, database, or cache
+- **No verbatim transcripts** — Only scores, signals, and summaries leave the backend
+- **Injection-hardened** — `json_object` response format + score clamping `[0.0, 1.0]` + verdict enum validation; model cannot produce an unhandled result
+- **184 automated tests** — Unit, integration, and adversarial robustness suite
+
+→ Full threat model and privacy analysis: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
+
+---
+
+## Claim-Proof Scoreboard
+
+| Claim | Evidence | Artifact | How to reproduce |
+|-------|----------|----------|-----------------|
+| 25/25 detection accuracy | 100% on curated eval set (20 scam + 5 adversarial) | [docs/EVALUATION.md](docs/EVALUATION.md) | `python scripts/run_evaluation.py --url http://localhost:8000` |
+| Zero false positives | 0/10 safe calls misclassified | [docs/EVALUATION.md](docs/EVALUATION.md) | Run evaluation script, inspect L01–L10 rows |
+| 184 automated tests | Full unit + integration suite | [backend/tests/](backend/tests/) | `cd backend && pytest --tb=short -q` |
+| Audio-native advantage | Voxtral processes raw WAV — no transcription step | [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md) | Upload WAV; compare audio vs text scores in report |
+| Privacy-first design | Zero audio storage; in-memory only | [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Review Sections 3–5 of threat model |
+| Production latency | < 3s per 5s audio chunk | [docs/EVALUATION.md](docs/EVALUATION.md) | Record 10s live; watch chunk timestamps in log |
 
 ---
 
