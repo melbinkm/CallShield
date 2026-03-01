@@ -27,7 +27,7 @@ export default function App() {
       .catch(() => {});
   }, []);
   const { isAnalyzing, report, error, submitAudio, submitTranscript, clearResults } = useAnalyze();
-  const { isRecording, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording, clearStream } = useStream();
+  const { isRecording, isProcessingFinal, partialResults, finalResult, error: streamError, audioLevel, startRecording, stopRecording, clearStream } = useStream();
 
   const hasAnyResults = report !== null || finalResult !== null || partialResults.length > 0;
 
@@ -142,6 +142,13 @@ export default function App() {
           onToggle={() => setShowLog((v) => !v)}
         />
 
+        {/* Loading card while waiting for final analysis */}
+        {!isRecording && isProcessingFinal && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+            <p className="text-gray-300 text-sm animate-pulse">Analyzing full recording…</p>
+          </div>
+        )}
+
         {/* Final summary card after recording stops */}
         {!isRecording && finalResult && (finalResult.total_chunks ?? 0) === 0 && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-400 text-sm">
@@ -207,7 +214,7 @@ export default function App() {
 
         <AnalysisPanel report={report} isLoading={isAnalyzing} />
 
-        {hasAnyResults && !isRecording && !isAnalyzing && (
+        {hasAnyResults && !isRecording && !isProcessingFinal && !isAnalyzing && (
           <div className="flex justify-center">
             <button
               onClick={handleReset}

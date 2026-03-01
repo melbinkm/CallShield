@@ -55,6 +55,7 @@ function encodeWAV(samples: Float32Array, sampleRate: number): ArrayBuffer {
 
 export function useStream() {
   const [isRecording, setIsRecording] = useState(false);
+  const [isProcessingFinal, setIsProcessingFinal] = useState(false);
   const [partialResults, setPartialResults] = useState<PartialResult[]>([]);
   const [finalResult, setFinalResult] = useState<{
     type: string;
@@ -164,6 +165,8 @@ export function useStream() {
             setPartialResults((prev) => [...prev, data]);
           } else if (data.type === "final_result") {
             setFinalResult(data);
+            setIsProcessingFinal(false);
+            ws.close();
           } else if (data.type === "error") {
             setError(data.detail);
           }
@@ -175,6 +178,7 @@ export function useStream() {
       ws.onerror = () => setError("WebSocket connection failed. Is the backend running?");
       ws.onclose = () => {
         setIsRecording(false);
+        setIsProcessingFinal(false);
         if (!intentionalCloseRef.current) {
           setError("Connection lost. Recording stopped.");
         }
@@ -186,6 +190,8 @@ export function useStream() {
 
   const stopRecording = useCallback(() => {
     intentionalCloseRef.current = true;
+    setIsRecording(false);
+    setIsProcessingFinal(true);
 
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
@@ -209,7 +215,9 @@ export function useStream() {
     const finish = () => {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "end_stream" }));
-        setTimeout(() => ws.close(), 500);
+        // Give the backend up to 30s to respond with final_result;
+        // ws.close() is called in onmessage once final_result arrives.
+        setTimeout(() => ws.close(), 30000);
       }
       audioCtx?.close();
     };
@@ -233,8 +241,9 @@ export function useStream() {
   const clearStream = useCallback(() => {
     setPartialResults([]);
     setFinalResult(null);
+    setIsProcessingFinal(false);
     setError(null);
   }, []);
 
-  return { isRecording, partialResults, finalResult, error, audioLevel, startRecording, stopRecording, clearStream };
+  return { isRecording, isProcessingFinal, partialResults, finalResult, error, audioLevel, startRecording, stopRecording, clearStream };
 }
