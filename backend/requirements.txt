@@ -5,4 +5,5 @@ mistralai
 pydantic
 python-dotenv
 websockets
+slowapi
 pytest

@@ -1,6 +1,6 @@
 import time
 import logging
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 
 logger = logging.getLogger(__name__)
 from services.audio_analyzer import analyze_audio
@@ -8,11 +8,14 @@ from services.text_analyzer import analyze_transcript as analyze_text
 from services.response_formatter import parse_analysis_result, build_scam_report
 from models.schemas import ScamReport, ErrorResponse, TranscriptRequest
 from config import MAX_AUDIO_SIZE_MB, MAX_TRANSCRIPT_LENGTH
+from auth import require_api_key
+from rate_limit import limiter
 
 router = APIRouter()
 
 @router.post("/api/analyze/audio", response_model=ScamReport)
-async def analyze_audio_endpoint(file: UploadFile = File(...)):
+@limiter.limit("10/minute")
+async def analyze_audio_endpoint(request: Request, file: UploadFile = File(...), _key=Depends(require_api_key)):
     start_time = time.time()
 
     # Validate file type
@@ -67,10 +70,11 @@ async def analyze_audio_endpoint(file: UploadFile = File(...)):
     return report
 
 @router.post("/api/analyze/transcript", response_model=ScamReport)
-async def analyze_transcript_endpoint(request: TranscriptRequest):
+@limiter.limit("20/minute")
+async def analyze_transcript_endpoint(request: Request, body: TranscriptRequest = None, _key=Depends(require_api_key)):
     start_time = time.time()
 
-    transcript = request.transcript.strip()
+    transcript = body.transcript.strip()
     if not transcript:
         raise HTTPException(
             status_code=400,

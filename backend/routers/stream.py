@@ -1,7 +1,9 @@
 import json
 import asyncio
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from typing import Optional
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from services.stream_processor import StreamProcessor
+from auth import verify_ws_api_key
 
 router = APIRouter()
 
@@ -9,7 +11,12 @@ MAX_CHUNK_SIZE = 512 * 1024  # 512KB
 MAX_CHUNKS = 60
 
 @router.websocket("/ws/stream")
-async def stream_audio(ws: WebSocket):
+async def stream_audio(ws: WebSocket, api_key: Optional[str] = Query(None)):
+    if not verify_ws_api_key(api_key):
+        await ws.accept()
+        await ws.send_json({"type": "error", "detail": "Invalid or missing API key."})
+        await ws.close(code=4001)
+        return
     await ws.accept()
     try:
         await ws.send_json({"type": "connected"})

@@ -318,6 +318,55 @@ See [DEPLOY.md](DEPLOY.md) for production deployment (Docker, Render, manual).
 }
 ```
 
+## Developer API
+
+CallShield exposes a developer API with optional key-based authentication and rate limiting.
+
+### Generating an API Key
+
+```bash
+python scripts/generate_api_key.py --name "my-app"
+```
+
+When no `api_keys.json` exists, all endpoints are open (dev mode). Auth activates only after generating a key.
+
+### Example Requests
+
+**Transcript analysis:**
+```bash
+curl -X POST http://localhost:8000/api/analyze/transcript \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: cs_YOUR_KEY_HERE" \
+  -d '{"transcript": "Hello, this is the IRS. You owe $5000 in back taxes."}'
+```
+
+**Audio upload:**
+```bash
+curl -X POST http://localhost:8000/api/analyze/audio \
+  -H "X-API-Key: cs_YOUR_KEY_HERE" \
+  -F "file=@recording.wav"
+```
+
+**WebSocket streaming (wscat):**
+```bash
+wscat -c "ws://localhost:8000/ws/stream?api_key=cs_YOUR_KEY_HERE"
+```
+
+### Rate Limits
+
+| Endpoint | Limit |
+|----------|-------|
+| `POST /api/analyze/audio` | 10 requests/minute |
+| `POST /api/analyze/transcript` | 20 requests/minute |
+| `WS /ws/stream` | No rate limit |
+
+### Interactive Docs
+
+- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs) — click the **Authorize** button to set your API key
+- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
+
 ## Environment Variables
 
 | Variable | Required | Description |

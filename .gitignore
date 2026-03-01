@@ -16,6 +16,7 @@ frontend/dist/
 .env
 .secrets/
 *.pem
+api_keys.json
 
 # OS
 .DS_Store

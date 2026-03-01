@@ -27,6 +27,51 @@ _mistralai = types.ModuleType("mistralai")
 _mistralai.Mistral = lambda **kw: None
 sys.modules.setdefault("mistralai", _mistralai)
 
+# ── Auth & rate-limit stubs (before app import) ──────────────────────────────
+
+# Stub slowapi so it works without installation during basic tests
+_slowapi = types.ModuleType("slowapi")
+_slowapi_util = types.ModuleType("slowapi.util")
+_slowapi_errors = types.ModuleType("slowapi.errors")
+
+
+class _StubLimiter:
+    """No-op limiter that passes through all requests."""
+    def __init__(self, **kw):
+        pass
+
+    def limit(self, *args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
+
+_slowapi.Limiter = _StubLimiter
+_slowapi_util.get_remote_address = lambda: "127.0.0.1"
+_slowapi_errors.RateLimitExceeded = type("RateLimitExceeded", (Exception,), {})
+sys.modules.setdefault("slowapi", _slowapi)
+sys.modules.setdefault("slowapi.util", _slowapi_util)
+sys.modules.setdefault("slowapi.errors", _slowapi_errors)
+
+# Stub rate_limit module
+_rate_limit = types.ModuleType("rate_limit")
+_rate_limit.limiter = _StubLimiter()
+sys.modules["rate_limit"] = _rate_limit
+
+# Stub auth module — disable auth so existing tests pass unchanged
+_auth = types.ModuleType("auth")
+_auth.is_auth_enabled = lambda: False
+_auth.verify_api_key = lambda key: True
+_auth.verify_ws_api_key = lambda key: True
+
+
+async def _noop_require_api_key(api_key=None):
+    return None
+
+
+_auth.require_api_key = _noop_require_api_key
+sys.modules["auth"] = _auth
+
 # Eagerly import app so all modules are cached with correct stubs
 from main import app as _app
 from fastapi.testclient import TestClient
