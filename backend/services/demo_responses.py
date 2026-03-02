@@ -114,13 +114,31 @@ def get_demo_audio_response() -> dict:
 
     In production, the second-opinion triggers when Voxtral score > 0.5.
     Demo mode always shows both analyses so judges see the dual-model orchestration.
+    Text score is set lower than audio score to illustrate the audio-native advantage.
     """
     key = random.choice(_AUDIO_KEYS)
     result = _fresh_copy(_RESPONSES[key])
-    result["text_analysis"] = deepcopy(_DEMO_TEXT_ANALYSIS)
-    # Recalculate combined score: 60% audio + 40% text (mirrors build_scam_report weighting)
+
+    # Text score is always 15pp below audio — audio-native catches more
     audio_score = (result.get("audio_analysis") or {}).get("scam_score", result["combined_score"])
-    result["combined_score"] = round(min(1.0, 0.6 * audio_score + 0.4 * _DEMO_TEXT_ANALYSIS["scam_score"]), 2)
+    text_score = round(max(0.0, audio_score - 0.15), 2)
+
+    def _verdict(score: float) -> str:
+        if score < 0.30:
+            return "SAFE"
+        if score < 0.60:
+            return "SUSPICIOUS"
+        if score < 0.85:
+            return "LIKELY_SCAM"
+        return "SCAM"
+
+    text_analysis = deepcopy(_DEMO_TEXT_ANALYSIS)
+    text_analysis["scam_score"] = text_score
+    text_analysis["verdict"] = _verdict(text_score)
+
+    result["text_analysis"] = text_analysis
+    # Recalculate combined score: 60% audio + 40% text (mirrors build_scam_report weighting)
+    result["combined_score"] = round(min(1.0, 0.6 * audio_score + 0.4 * text_score), 2)
     return result
 
 

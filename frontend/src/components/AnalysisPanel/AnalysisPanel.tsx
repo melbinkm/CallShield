@@ -117,41 +117,46 @@ export default function AnalysisPanel({ report, isLoading }: Props) {
       <RecommendationBox recommendation={analysis.recommendation} />
 
       {/* Side-by-side comparison panel */}
-      {report.audio_analysis && report.text_analysis && (
-        <div className="bg-gray-700/50 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-3">
-            Why Audio-Native Wins
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="text-xs text-gray-400 mb-1">Voxtral (audio-native)</p>
-              <p className={`text-2xl font-bold ${report.audio_analysis.scam_score >= 0.6 ? "text-red-400" : report.audio_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
-                {Math.round(report.audio_analysis.scam_score * 100)}%
-              </p>
-              <p className="text-xs text-gray-400 mt-1">{report.audio_analysis.verdict.replace("_", " ")}</p>
+      {report.audio_analysis && report.text_analysis && (() => {
+        const delta = Math.round((report.audio_analysis.scam_score - report.text_analysis.scam_score) * 100);
+        const audioWins = delta > 0;
+        const tied = Math.abs(delta) < 1;
+        return (
+          <div className="bg-gray-700/50 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-3">
+              {tied ? "Audio vs Text Comparison" : audioWins ? "Why Audio-Native Wins" : "Audio vs Text Comparison"}
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-xs text-gray-400 mb-1">Voxtral (audio-native)</p>
+                <p className={`text-2xl font-bold ${report.audio_analysis.scam_score >= 0.6 ? "text-red-400" : report.audio_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
+                  {Math.round(report.audio_analysis.scam_score * 100)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{report.audio_analysis.verdict.replace("_", " ")}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-1">Mistral Large (second opinion)</p>
+                <p className={`text-2xl font-bold ${report.text_analysis.scam_score >= 0.6 ? "text-red-400" : report.text_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
+                  {Math.round(report.text_analysis.scam_score * 100)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{report.text_analysis.verdict.replace("_", " ")}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-400 mb-1">Text-only</p>
-              <p className={`text-2xl font-bold ${report.text_analysis.scam_score >= 0.6 ? "text-red-400" : report.text_analysis.scam_score >= 0.3 ? "text-yellow-400" : "text-green-400"}`}>
-                {Math.round(report.text_analysis.scam_score * 100)}%
+            {!tied && (
+              <p className={`text-xs text-center mt-3 font-medium ${audioWins ? "text-red-400" : "text-blue-400"}`}>
+                Delta: {audioWins ? `+${delta}pp` : `${delta}pp`} — {audioWins ? "audio detected more risk than second opinion" : "second opinion detected more risk than audio"}
               </p>
-              <p className="text-xs text-gray-400 mt-1">{report.text_analysis.verdict.replace("_", " ")}</p>
-            </div>
+            )}
+            <p className="text-xs text-gray-500 text-center mt-2 italic">
+              {audioWins
+                ? "Audio-native analysis caught paralinguistic cues the transcript alone missed."
+                : tied
+                ? "Both models reached the same conclusion."
+                : "Combined score weighs both models: 60% audio + 40% text."}
+            </p>
           </div>
-          {(() => {
-            const delta = Math.round((report.audio_analysis.scam_score - report.text_analysis.scam_score) * 100);
-            if (Math.abs(delta) < 1) return null;
-            return (
-              <p className={`text-xs text-center mt-3 font-medium ${delta > 0 ? "text-red-400" : "text-green-400"}`}>
-                Delta: {delta > 0 ? `+${delta}pp` : `${delta}pp`} {"\u2190"} audio {delta > 0 ? "detected more risk" : "found less risk"} than text
-              </p>
-            );
-          })()}
-          <p className="text-xs text-gray-500 text-center mt-2 italic">
-            Audio-native analysis catches paralinguistic cues text alone misses.
-          </p>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Trust Panel */}
       <div className="bg-gray-900/60 border border-gray-700/50 rounded-lg px-4 py-3 space-y-1.5">
