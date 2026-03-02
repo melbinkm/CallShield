@@ -289,7 +289,7 @@ flowchart TD
 
 ## Credits
 
-Built for the **Mistral AI Worldwide Hackathon 2026**
+Built for the **Mistral AI Worldwide Hackathon 2026** — developed in 48 hours
 
 Powered by [Voxtral Mini](https://mistral.ai/) — Mistral's native audio understanding model
 
