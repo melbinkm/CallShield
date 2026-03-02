@@ -61,8 +61,8 @@ This ensures the score responds quickly to new scam indicators without being thr
 
 | Scenario | Expected latency |
 |---|---|
-| Single chunk (streaming) | 3--8 seconds |
-| Full file upload (short clip) | 4--10 seconds |
+| Single chunk (streaming) | 1.5 -- 2.8 seconds (warm instance) / up to 4.5s on cold start |
+| Full file upload (short clip) | 2 -- 4 seconds |
 
 ### Cost Estimates
 

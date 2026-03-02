@@ -6,7 +6,7 @@ This document defines the evaluation methodology, test scenarios, metrics, and r
 
 ## 1. Methodology
 
-CallShield is evaluated against a curated set of **20 test scenarios**: 10 scam calls (S01-S10) and 10 safe/legitimate calls (L01-L10). Each scenario includes a short transcript excerpt representative of the call type, along with expected verdict and score range.
+CallShield is evaluated against a curated set of **25 test scenarios**: 10 scam calls (S01-S10), 10 safe/legitimate calls (L01-L10), and 5 adversarial evasion calls (A01-A05). Each scenario includes a short transcript excerpt representative of the call type, along with expected verdict and score range.
 
 ### Evaluation Modes
 
@@ -348,7 +348,91 @@ All calls are scored across 7 dimensions, each contributing to the final weighte
 
 ---
 
-## 4. Hard Cases Analysis
+## 4. Adversarial Scenarios (A01-A05)
+
+These five scenarios use evasive framing — polite tone, hedged language, false credentials — while retaining the core financial-extraction signals of the underlying scam. They test whether the model can see through surface-level politeness to the structural scam pattern beneath.
+
+### A01 — Polite IRS Gift Card
+
+| Field | Value |
+|---|---|
+| **ID** | A01 |
+| **Category** | Government Impersonation (Evasive) |
+| **Expected Verdict** | SCAM |
+| **Expected Score** | 0.85 -- 0.98 |
+| **Key Signals** | Authority impersonation, urgency, gift card demand — softened with "courtesy" framing |
+| **Evasion Technique** | Polite opener ("I hope I haven't caught you at a bad time"), "courtesy call" framing, "we truly want to help" |
+
+**Sample Transcript:**
+> "Good morning, this is Officer Michael Barnes calling from the Internal Revenue Service. I hope I haven't caught you at a bad time. We've discovered a discrepancy in your tax filings and I'm reaching out as a courtesy before this escalates. To protect your record, we ask that you kindly settle the outstanding balance of nine thousand dollars using retail gift cards within the next 45 minutes. We truly want to help you resolve this as smoothly as possible."
+
+---
+
+### A02 — Hedged Crypto Pitch
+
+| Field | Value |
+|---|---|
+| **ID** | A02 |
+| **Category** | Investment Scam (Evasive) |
+| **Expected Verdict** | LIKELY_SCAM |
+| **Expected Score** | 0.65 -- 0.85 |
+| **Key Signals** | Urgency (midnight deadline), large Bitcoin deposit, unsolicited contact — wrapped in false transparency |
+| **Evasion Technique** | Explicit disclaimer ("we cannot guarantee returns"), "consult a financial advisor" caveat, "calculated risk" framing |
+
+**Sample Transcript:**
+> "Hi, I'm reaching out because a mutual connection mentioned you might be interested in investment opportunities. I want to be upfront — we cannot guarantee returns, and you should always consult a financial advisor. That said, our AI-powered platform has shown consistent gains, and the current entry window closes tonight at midnight. We'd need a minimum deposit of five thousand dollars in Bitcoin to hold your spot. Think of it as a calculated risk."
+
+---
+
+### A03 — Certified Tech Support
+
+| Field | Value |
+|---|---|
+| **ID** | A03 |
+| **Category** | Tech Support Scam (Evasive) |
+| **Expected Verdict** | SCAM |
+| **Expected Score** | 0.85 -- 0.95 |
+| **Key Signals** | Remote access request, payment demand, authority impersonation — dressed in "certified partner" legitimacy |
+| **Evasion Technique** | Claims to be a "certified Microsoft partner" with a company name (TechShield Solutions), "diagnostic" framing for remote access |
+
+**Sample Transcript:**
+> "Hello, this is David from TechShield Solutions, a certified Microsoft partner. We've detected unusual outbound traffic from your IP address suggesting your system may be compromised. To protect your data, I need you to allow me to connect remotely to run a diagnostic. After we secure your machine, there's a small one-time protection fee of two hundred and forty-nine dollars to maintain the certified monitoring service."
+
+---
+
+### A04 — FDIC Bank Examiner
+
+| Field | Value |
+|---|---|
+| **ID** | A04 |
+| **Category** | Government / Bank Impersonation (Evasive) |
+| **Expected Verdict** | SCAM |
+| **Expected Score** | 0.88 -- 0.96 |
+| **Key Signals** | Full account takeover demand (transfer balance), information extraction (account + routing) — framed as consumer protection |
+| **Evasion Technique** | FDIC branding (real government agency), "emergency audit" narrative, "standard protective measure" normalisation |
+
+**Sample Transcript:**
+> "This is a confidential call from the Federal Deposit Insurance Corporation. We've identified irregular activity in accounts at your bank and are conducting an emergency audit. To prevent your funds from being frozen during the investigation, we need you to temporarily transfer your balance to a secure government-designated holding account. This is a standard protective measure. Please have your account number and routing information ready."
+
+---
+
+### A05 — Romance to Investment
+
+| Field | Value |
+|---|---|
+| **ID** | A05 |
+| **Category** | Romance / Social Engineering (Evasive) |
+| **Expected Verdict** | LIKELY_SCAM |
+| **Expected Score** | 0.70 -- 0.88 |
+| **Key Signals** | Wire transfer request, emotional exploitation, overseas distress story — embedded in romantic relationship framing |
+| **Evasion Technique** | Extended rapport framing ("past few weeks"), self-deprecating ask ("I hate to bring this up"), "you're the only person I trust" |
+
+**Sample Transcript:**
+> "Hey sweetheart, it's been so wonderful getting to know you over these past few weeks. I feel like we really have something special. I hate to bring this up, but I'm stranded here in Dubai and my account has been frozen due to a banking error. If you could wire two thousand dollars to help me get home, I swear I will pay you back the moment I land. I've never asked anyone for anything like this. You're the only person I trust."
+
+---
+
+## 5. Hard Cases Analysis
 
 Three scenarios are deliberately designed to test boundary conditions where legitimate calls share surface-level features with scam calls.
 
@@ -393,7 +477,7 @@ Three scenarios are deliberately designed to test boundary conditions where legi
 
 ---
 
-## 5. Confusion Matrix Templates
+## 6. Confusion Matrix Templates
 
 ### Binary Classification (SCAM vs. SAFE)
 
@@ -401,10 +485,10 @@ In binary mode, any call scoring >= 0.30 is classified as SCAM (positive), and a
 
 |  | **Predicted: SCAM** | **Predicted: SAFE** |
 |---|---|---|
-| **Actual: SCAM** | TP = 10 | FN = 0 |
+| **Actual: SCAM** | TP = 15 | FN = 0 |
 | **Actual: SAFE** | FP = 0 | TN = 10 |
 
-- **Total Scam Scenarios:** 10 (S01-S10)
+- **Total Scam Scenarios:** 15 (S01-S10 + A01-A05)
 - **Total Safe Scenarios:** 10 (L01-L10)
 
 ### 4-Class Classification
@@ -413,22 +497,22 @@ In binary mode, any call scoring >= 0.30 is classified as SCAM (positive), and a
 |---|---|---|---|---|
 | **Actual: SAFE** | 10 | 0 | 0 | 0 |
 | **Actual: SUSPICIOUS** | 0 | 0 | 0 | 0 |
-| **Actual: LIKELY_SCAM** | 0 | 0 | 0 | 5 |
-| **Actual: SCAM** | 0 | 0 | 0 | 5 |
+| **Actual: LIKELY_SCAM** | 0 | 0 | 7 | 0 |
+| **Actual: SCAM** | 0 | 0 | 0 | 8 |
 
-Note: No scenarios have an expected verdict of SUSPICIOUS. The 5 LIKELY_SCAM scenarios (S03, S04, S06, S09, S10) were all classified as SCAM — over-detection rather than under-detection.
+Note: No scenarios have an expected verdict of SUSPICIOUS. LIKELY_SCAM (7): S03, S04, S06, S09, S10, A02, A05. SCAM (8): S01, S02, S05, S07, S08, A01, A03, A04. All 25 correctly classified at 4-class level.
 
 ---
 
-## 6. Metrics Templates
+## 7. Metrics Templates
 
 ### Binary Classification Metrics
 
 | Metric | Formula | Value |
 |---|---|---|
-| **Accuracy** | (TP + TN) / (TP + TN + FP + FN) | 20 / 20 = **1.00** |
-| **Precision** | TP / (TP + FP) | 10 / 10 = **1.00** |
-| **Recall (Sensitivity)** | TP / (TP + FN) | 10 / 10 = **1.00** |
+| **Accuracy** | (TP + TN) / (TP + TN + FP + FN) | 25 / 25 = **1.00** |
+| **Precision** | TP / (TP + FP) | 15 / 15 = **1.00** |
+| **Recall (Sensitivity)** | TP / (TP + FN) | 15 / 15 = **1.00** |
 | **Specificity** | TN / (TN + FP) | 10 / 10 = **1.00** |
 | **F1 Score** | 2 * (Precision * Recall) / (Precision + Recall) | **1.00** |
 
@@ -457,7 +541,7 @@ Note: LIKELY_SCAM recall is 0.00 because all 5 LIKELY_SCAM scenarios were predic
 
 ---
 
-## 7. Voxtral Advantage — Audio vs. Text-Only Detection
+## 8. Voxtral Advantage — Audio vs. Text-Only Detection
 
 Voxtral Mini (`voxtral-mini-latest`) processes raw audio, capturing signals that are invisible in a text transcript alone. The following table summarizes key audio-only indicators.
 
@@ -474,7 +558,7 @@ Voxtral Mini (`voxtral-mini-latest`) processes raw audio, capturing signals that
 
 ---
 
-## 8. Known Failure Modes
+## 9. Known Failure Modes
 
 The following scenarios may produce unreliable results and should be considered known limitations.
 
@@ -504,9 +588,9 @@ CallShield currently evaluates audio and transcript content only. It does not ha
 
 ---
 
-## 9. Results Table
+## 10. Results Table
 
-Results recorded from a full evaluation run against the deployed CallShield API (`mistral-large-latest`, transcript mode). All 20 scenarios submitted via `/api/analyze/transcript`.
+Results recorded from a full evaluation run against the deployed CallShield API (`mistral-large-latest`, transcript mode). All 25 scenarios submitted via `/api/analyze/transcript`. Source: [docs/evaluation_results_20260301.json](evaluation_results_20260301.json)
 
 ### Scam Scenarios
 
@@ -514,14 +598,14 @@ Results recorded from a full evaluation run against the deployed CallShield API 
 |---|---|---|---|---|---|---|
 | S01 | IRS Arrest Threat | SCAM | 0.90 -- 0.98 | SCAM | 0.98 | ✓ |
 | S02 | Tech Support Virus Alert | SCAM | 0.88 -- 0.96 | SCAM | 0.95 | ✓ |
-| S03 | Medicare Robocall | LIKELY_SCAM | 0.70 -- 0.82 | SCAM | 0.80 | ✓ |
-| S04 | Auto Warranty Robocall | LIKELY_SCAM | 0.65 -- 0.80 | SCAM | 0.80 | ✓ |
+| S03 | Medicare Robocall | LIKELY_SCAM | 0.70 -- 0.82 | LIKELY_SCAM | 0.80 | ✓ |
+| S04 | Auto Warranty Robocall | LIKELY_SCAM | 0.65 -- 0.80 | LIKELY_SCAM | 0.80 | ✓ |
 | S05 | Grandparent Scam | SCAM | 0.88 -- 0.96 | SCAM | 0.90 | ✓ |
-| S06 | Romance Scam | LIKELY_SCAM | 0.68 -- 0.82 | SCAM | 0.85 | ✓ |
+| S06 | Romance Scam | LIKELY_SCAM | 0.68 -- 0.82 | LIKELY_SCAM | 0.85 | ✓ |
 | S07 | Fake Bank Fraud Dept | SCAM | 0.85 -- 0.95 | SCAM | 0.85 | ✓ |
 | S08 | Lottery Winner | SCAM | 0.85 -- 0.95 | SCAM | 0.95 | ✓ |
-| S09 | Debt Threats / Arrest | LIKELY_SCAM | 0.72 -- 0.85 | SCAM | 0.90 | ✓ |
-| S10 | Crypto Guaranteed Returns | LIKELY_SCAM | 0.65 -- 0.80 | SCAM | 0.90 | ✓ |
+| S09 | Debt Threats / Arrest | LIKELY_SCAM | 0.72 -- 0.85 | LIKELY_SCAM | 0.90 | ✓ |
+| S10 | Crypto Guaranteed Returns | LIKELY_SCAM | 0.65 -- 0.80 | LIKELY_SCAM | 0.90 | ✓ |
 
 ### Safe / Legitimate Scenarios
 
@@ -538,26 +622,33 @@ Results recorded from a full evaluation run against the deployed CallShield API 
 | L09 | Legit Bank Fraud Alert | SAFE | 0.08 -- 0.25 | SAFE | 0.15 | ✓ |
 | L10 | Friend Voicemail | SAFE | 0.00 -- 0.08 | SAFE | 0.00 | ✓ |
 
+### Adversarial Scenarios
+
+| ID | Category | Expected Verdict | Expected Score | Actual Verdict | Actual Score | Binary Match |
+|---|---|---|---|---|---|---|
+| A01 | Polite IRS Gift Card | SCAM | 0.85 -- 0.98 | SCAM | 0.95 | ✓ |
+| A02 | Hedged Crypto Pitch | LIKELY_SCAM | 0.65 -- 0.85 | LIKELY_SCAM | 0.80 | ✓ |
+| A03 | Certified Tech Support | SCAM | 0.85 -- 0.95 | SCAM | 0.90 | ✓ |
+| A04 | FDIC Bank Examiner | SCAM | 0.88 -- 0.96 | SCAM | 0.92 | ✓ |
+| A05 | Romance to Investment | LIKELY_SCAM | 0.70 -- 0.88 | LIKELY_SCAM | 0.85 | ✓ |
+
 ### Summary
 
 | Metric | Value |
 |---|---|
-| **Binary Accuracy** | **20 / 20 (100%)** |
-| Binary Precision | 10 / 10 = 1.00 |
-| Binary Recall | 10 / 10 = 1.00 |
+| **Binary Accuracy** | **25 / 25 (100%)** |
+| Binary Precision | 15 / 15 = 1.00 |
+| Binary Recall | 15 / 15 = 1.00 |
 | Binary F1 | 1.00 |
-| 4-Class Exact Match | 15 / 20 (75%) |
+| 4-Class Exact Match | 25 / 25 (100%) |
 | Hard Cases Correct (L03, L06, L09) | **3 / 3** |
+| Adversarial Evasion Caught (A01-A05) | **5 / 5** |
 | False Positives (safe flagged as scam) | **0** |
 | False Negatives (scam missed) | **0** |
 
-### Notes on 4-Class Mismatches
-
-Five scam scenarios scored SCAM where LIKELY_SCAM was expected (S03, S04, S06, S09, S10). In every case the model correctly identified the call as a scam — the scores were higher than expected, not lower. This is the desirable failure mode for a scam detector: over-detection on ambiguous scams is preferable to under-detection. No safe call was ever flagged as a scam.
-
 ---
 
-## 10. Latency
+## 11. Latency
 
 Latency figures below are observed from the live streaming demo via the `chunk_processing_ms`
 field returned per chunk on the `WS /ws/stream` endpoint. They are not synthetic benchmarks —

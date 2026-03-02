@@ -14,7 +14,7 @@ Get CallShield running in under 2 minutes.
 ## Option A: Docker (Recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/callshield.git
+git clone https://github.com/melbinkm/callshield.git
 cd callshield
 cp backend/.env.example backend/.env
 # Edit backend/.env — paste your MISTRAL_API_KEY

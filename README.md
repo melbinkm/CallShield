@@ -70,7 +70,7 @@
 git clone https://github.com/melbinkm/callshield.git && cd callshield
 cp backend/.env.example backend/.env   # add MISTRAL_API_KEY
 make dev                               # starts backend + frontend
-python scripts/run_evaluation.py --url http://localhost:8000
+python scripts/run_evaluation.py --url http://localhost:8001
 ```
 
 Expected: `Binary accuracy: 25/25 = 100.00%` — exit code `0`.
@@ -184,7 +184,7 @@ CallShield's REST + WebSocket API integrates directly with **VoIP platforms** (T
 
 | Claim | Evidence | Artifact | How to reproduce |
 |-------|----------|----------|-----------------|
-| 25/25 detection accuracy | 100% on curated eval set (20 scam + 5 adversarial) | [docs/EVALUATION.md](docs/EVALUATION.md) | `python scripts/run_evaluation.py --url http://localhost:8000` |
+| 25/25 detection accuracy | 100% on curated eval set (20 scam + 5 adversarial) | [docs/EVALUATION.md](docs/EVALUATION.md) | `python scripts/run_evaluation.py --url http://localhost:8001` |
 | Zero false positives | 0/10 safe calls misclassified | [docs/EVALUATION.md](docs/EVALUATION.md) | Run evaluation script, inspect L01–L10 rows |
 | 184 automated tests | Full unit + integration suite | [backend/tests/](backend/tests/) | `cd backend && pytest --tb=short -q` |
 | Audio-native advantage | Voxtral processes raw WAV — no transcription step | [docs/MODEL_USAGE.md](docs/MODEL_USAGE.md) | Upload WAV; compare audio vs text scores in report |
