@@ -51,6 +51,34 @@
 
 ---
 
+## Quickstart
+
+> **Judges:** Zero-setup demo in 30 seconds — no API key, no account:
+> 1. `cp backend/.env.example backend/.env && make dev`
+> 2. Open **http://localhost:5173**
+> 3. Click any scenario card → verdict appears in ~2 seconds
+>
+> Or skip setup entirely: **[https://callshield-ui.onrender.com](https://callshield-ui.onrender.com)**
+
+### Path A — No API Key (instant, zero setup)
+1. Open **[https://callshield-ui.onrender.com/](https://callshield-ui.onrender.com/)**
+2. Click a scenario card or **"Try Sample"**
+3. Verdict appears in ~2 seconds
+
+### Path B — Reproduce the 25/25 Evaluation (API key required)
+```bash
+git clone https://github.com/melbinkm/callshield.git && cd callshield
+cp backend/.env.example backend/.env   # add MISTRAL_API_KEY
+make dev                               # starts backend + frontend
+python scripts/run_evaluation.py --url http://localhost:8000
+```
+
+Expected: `Binary accuracy: 25/25 = 100.00%` — exit code `0`.
+
+→ Full setup options (Docker, manual, one-line): [docs/QUICKSTART.md](docs/QUICKSTART.md)
+
+---
+
 ## The Problem
 
 The FTC reported **$25.5 billion** in phone and online fraud losses in 2023. Phone scams are the #1 vector for elder financial abuse globally — and the problem is accelerating as AI-generated voices make scam calls indistinguishable from legitimate ones.
@@ -181,34 +209,6 @@ Traditional scam detection transcribes first, then analyzes. CallShield skips th
 > **Key insight:** A caller saying *"your account is NOT at risk"* with rising panic signals scam. STT sees "NOT at risk" → safe. Voxtral hears the acoustic stress pattern → flags it.
 
 → Full comparison: [docs/COMPARISON.md](docs/COMPARISON.md)
-
----
-
-## Quickstart
-
-> **Judges:** Zero-setup demo in 30 seconds — no API key, no account:
-> 1. `cp backend/.env.example backend/.env && make dev`
-> 2. Open **http://localhost:5173**
-> 3. Click any scenario card → verdict appears in ~2 seconds
->
-> Or skip setup entirely: **[https://callshield-ui.onrender.com](https://callshield-ui.onrender.com)**
-
-### Path A — No API Key (instant, zero setup)
-1. Open **[https://callshield-ui.onrender.com/](https://callshield-ui.onrender.com/)**
-2. Click a scenario card or **"Try Sample"**
-3. Verdict appears in ~2 seconds
-
-### Path B — Reproduce the 25/25 Evaluation (API key required)
-```bash
-git clone https://github.com/melbinkm/callshield.git && cd callshield
-cp backend/.env.example backend/.env   # add MISTRAL_API_KEY
-make dev                               # starts backend + frontend
-python scripts/run_evaluation.py --url http://localhost:8000
-```
-
-Expected: `Binary accuracy: 25/25 = 100.00%` — exit code `0`.
-
-→ Full setup options (Docker, manual, one-line): [docs/QUICKSTART.md](docs/QUICKSTART.md)
 
 ---
 
